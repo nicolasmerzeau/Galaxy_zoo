@@ -34,7 +34,7 @@ def initialize_model():
 
     model.add(layers.Rescaling(1./255))
 
-    # Architecture basee sur MNIST classification
+    # Architecture test
     model.add(layers.Conv2D(8, (4, 4), activation="relu", padding="same"))
     model.add(layers.MaxPool2D(pool_size=(2, 2)))
 
@@ -42,6 +42,11 @@ def initialize_model():
 
     model.add(layers.Conv2D(16, (3, 3), activation="relu"))
     model.add(layers.MaxPool2D(pool_size=(2, 2)))
+
+    ### Third Convolution & MaxPooling
+
+    model.add(layers.Conv2D(filters = 64, kernel_size = (3,3), activation="relu", padding="same"))
+    model.add(layers.MaxPooling2D(pool_size=(2, 2), padding="same") )
 
     model.add(layers.Flatten())
 
@@ -70,7 +75,7 @@ history_small = model_small.fit(X, y_cat,
                     epochs = 20,
                     batch_size = 128)
 
-# Avec ces paramètres on obtient une val accuracy de 0.64 (pour 1000 par categorie)
+# Avec ces paramètres on obtient une val accuracy de 0.68 (pour 1000 par categorie)
 
 # Fonction pour plot history
 
