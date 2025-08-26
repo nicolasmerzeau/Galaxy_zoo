@@ -1,0 +1,8 @@
+smooth_inbetween: Elliptical
+smooth_round: Elliptical
+unbarred_spiral: Spiral
+barred_spiral: Spiral
+edge_on_disk: Edge_Cigar
+smooth_cigar: Edge_Cigar
+featured_without_bar_or_spiral: drop
+-1: drop
