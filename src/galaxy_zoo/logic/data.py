@@ -9,15 +9,13 @@ def load_data() :
 
     current_dir = os.path.dirname(__file__) #Garde le chemin vers data.py peut import où la fonction est appelé
 
-    root = os.path.abspath(os.path.join(current_dir, "../../raw_data")) # on revient a src puis galaxy_zoo
+    root_data = os.path.abspath(os.path.join(current_dir, "../../../raw_data")) # on revient a src puis galaxy_zoo
 
-    train_catalog, label_columns = gz2(
-    root=root,
-    download=True,
-    train=True
-    )
+
+
+
     # Chemin vers ton fichier
-    file_path = os.path.join(root, "gz2_train_catalog.parquet")
+    file_path = os.path.join(root_data, "gz2_train_catalog.parquet")
 
 # Lecture
     df_experiment = pd.read_parquet(file_path)
@@ -52,7 +50,7 @@ def load_data() :
         target_id = f"{target}"
 
         # Dossier à parcourir
-        folder_path = os.path.join(root, "images") # ← modifie ici si besoin
+        folder_path = os.path.join(root_data, "images") # ← modifie ici si besoin
 
         # Recherche dans tous les sous-dossiers
         found_image = None
