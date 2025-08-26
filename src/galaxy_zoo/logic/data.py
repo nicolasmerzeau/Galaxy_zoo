@@ -1,4 +1,4 @@
-from galaxy_datasets import gz2
+
 import pandas as pd
 import os
 from PIL import Image
