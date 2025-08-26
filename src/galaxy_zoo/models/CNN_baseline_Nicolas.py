@@ -76,6 +76,11 @@ history_small = model_small.fit(X, y_cat,
                     batch_size = 128)
 
 # Avec ces paramètres on obtient une val accuracy de 0.68 (pour 1000 par categorie)
+# Avec ces paramètres on obtient une val accuracy de 0.70 (pour 2000 par categorie- batch size 128)
+# Avec ces paramètres on obtient une val accuracy de 0.73 (pour 2000 par categorie- batch size 32)
+
+
+
 
 # Fonction pour plot history
 
