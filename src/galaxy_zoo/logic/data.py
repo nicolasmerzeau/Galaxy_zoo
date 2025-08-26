@@ -37,10 +37,10 @@ def load_data() :
     2: "Edge-on / Cigar",
     -1: "Other"
     }
-    df_experiment["simple target"] = df_experiment["label"].map(dict_mapping)
-    df_experiment = df_experiment[df_experiment["simple target"]!=-1] # on enleve dans un premier temps la categorie -1
+    df_experiment["simple_target"] = df_experiment["label"].map(dict_mapping)
+    df_experiment = df_experiment[df_experiment["simple_target"]!=-1] # on enleve dans un premier temps la categorie -1
     df_balanced = (
-    df_experiment.groupby("simple target") #On limite a 6000 données
+    df_experiment.groupby("simple_target") #On limite a 6000 données
       .apply(lambda x: x.sample(n=2000, random_state=42))
       .reset_index(drop=True)
       .sample(frac=1, random_state=42)  # shuffle global
@@ -52,7 +52,7 @@ def load_data() :
         target_id = f"{target}"
 
         # Dossier à parcourir
-        folder_path = "/Users/ghalyaalami/code/nicolasmerzeau/Galaxy_zoo/raw_data/images"  # ← modifie ici si besoin
+        folder_path = os.path.join(root, "images") # ← modifie ici si besoin
 
         # Recherche dans tous les sous-dossiers
         found_image = None
@@ -71,7 +71,7 @@ def load_data() :
             img = Image.open(found_image)
             X.append(img)
     X = pd.DataFrame(X)
-    y = df_balanced["simple target"]
+    y = df_balanced["simple_target"]
 
 
 
