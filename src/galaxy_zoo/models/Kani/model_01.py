@@ -32,7 +32,7 @@ def create_model(input_shape, dropout_rate):
         layers.BatchNormalization(),
         layers.Dropout(dropout_rate/2),
 
-        layers.Dense(128, activation='relu'),
+        layers.Dense(input_shape[1], activation='relu'),
         layers.Dropout(dropout_rate/2),
 
         # Couche de sortie binaire
