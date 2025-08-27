@@ -8,6 +8,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from galaxy_zoo.utils.utils import print_debug
+from google.cloud import storage
 
 RANDOM_STATE = 42
 IMG_SIZE = 256
@@ -210,3 +211,34 @@ def load_data(nbr_data = 2000) :
 
 
     return df_images
+
+
+
+def upload_data(storage_filename, local_filename, bucket_name) :
+    """_summary_
+    Upload file to bucket
+    Args:
+        storage_filename (_type_): name of folder in the bucket where we upload our data
+        local_filename (_type_): path to our folder/file
+        bucket_name (_type_): our bucket name
+    """
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(storage_filename)
+    blob.upload_from_filename(local_filename)
+    return
+
+def download_data(storage_filename, local_filename, bucket_name):
+    """_summary_
+    download file from bucket
+    Args:
+        storage_filename (_type_): name of folder in the bucket where we upload our data
+        local_filename (_type_): path to our folder/file
+        bucket_name (_type_): our bucket name
+    """
+
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(storage_filename)
+    blob.download_to_filename(local_filename)
+    return
