@@ -170,3 +170,6 @@ generated/
 secrets/
 # **/notebook*/
 cache/
+
+#Modeles Keras
+*.keras

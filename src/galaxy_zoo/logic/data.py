@@ -1,4 +1,3 @@
-from galaxy_datasets import gz2
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -132,20 +131,18 @@ def load_and_preprocess_data(df: pd.DataFrame,
     return X, y
 
 
-def load_data() :
+def load_data(nbr_data = 2000) :
 
 
     current_dir = os.path.dirname(__file__) #Garde le chemin vers data.py peut import où la fonction est appelé
 
-    root = os.path.abspath(os.path.join(current_dir, "../../raw_data")) # on revient a src puis galaxy_zoo
+    root_data = os.path.abspath(os.path.join(current_dir, "../../../raw_data")) # on revient a src puis galaxy_zoo
 
-    train_catalog, label_columns = gz2(
-    root=root,
-    download=True,
-    train=True
-    )
+
+
+
     # Chemin vers ton fichier
-    file_path = os.path.join(root, "gz2_train_catalog.parquet")
+    file_path = os.path.join(root_data, "gz2_train_catalog.parquet")
 
 # Lecture
     df_experiment = pd.read_parquet(file_path)
@@ -169,22 +166,22 @@ def load_data() :
     df_experiment = df_experiment[df_experiment["simple_target"]!=-1] # on enleve dans un premier temps la categorie -1
     df_balanced = (
     df_experiment.groupby("simple_target") #On limite a 6000 données
-      .apply(lambda x: x.sample(n=2000, random_state=42))
+      .apply(lambda x: x.sample(n=nbr_data, random_state=42))
       .reset_index(drop=True)
       .sample(frac=1, random_state=42)  # shuffle global
       .reset_index(drop=True)           # remettre un index propre
     )
     X = []
-    for target in df_balanced["id_str"] : #On crée le dataframe d'image
-
+    labels = []
+    filename = []
+    for idx, target in enumerate(df_balanced["id_str"]):  # On parcourt les IDs
         target_id = f"{target}"
 
-        # Dossier à parcourir
-        folder_path = os.path.join(root, "images") # ← modifie ici si besoin
+    # Dossier à parcourir
+        folder_path = os.path.join(root_data, "images")
 
-        # Recherche dans tous les sous-dossiers
+    # Recherche dans tous les sous-dossiers
         found_image = None
-
         for root, dirs, files in os.walk(folder_path):
             for file in files:
                 if target_id in file:
@@ -197,11 +194,17 @@ def load_data() :
         if found_image:
             print(f"Image trouvée : {found_image}")
             img = Image.open(found_image)
-            X.append(img)
-    X = pd.DataFrame(X)
-    y = df_balanced["simple_target"]
+            img_array = np.array(img)   # transforme en array (H, W, C)
+            X.append(img_array)
+            labels.append(df_balanced["simple_target"].iloc[idx])  # associer le label
+            filename.append(df_balanced["filename"].iloc[idx])
+    # Construire un DataFrame avec 2 colonnes : image et label
+    df_images = pd.DataFrame({
+        "image": X,
+        "label": labels,
+        "filename": filename
+    })
 
 
 
-
-    return (X,y)
+    return df_images
