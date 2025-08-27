@@ -71,7 +71,7 @@ def init_model_custom(model_func = create_model, input_shape= INPUT_SHAPE, dropo
     # Compilation avec des métriques adaptées au déséquilibre de classes
     model.compile(
         optimizer=optimizers.Adam(learning_rate=0.001),
-        loss='binary_crossentropy',
+        loss='binary_crossentropy', # ou sparse_categorical_crossentropy si ovr = False
         metrics=[
             'accuracy',
             tf.keras.metrics.Precision(name='precision'),
@@ -155,7 +155,7 @@ def train_model(df: pd.DataFrame,
     return model, history.history, X, y
 
 
-def evaluate_model(X, y, model, target_class = 0) -> Tuple[Dict[str, float], np.ndarray, np.ndarray]:
+def evaluate_model(X, y, model, target_class = 0, threshold = 0.5) -> Tuple[Dict[str, float], np.ndarray, np.ndarray]:
     """
     Evaluates a trained classification model on the provided dataset and computes key metrics.
     Args:
@@ -171,7 +171,7 @@ def evaluate_model(X, y, model, target_class = 0) -> Tuple[Dict[str, float], np.
 
     # Prédictions
     y_pred_prob = model.predict(X, verbose=0)
-    y_pred = (y_pred_prob > 0.5).astype(int).flatten()
+    y_pred = (y_pred_prob > threshold).astype(int).flatten()
 
     # Métriques
     results = model.evaluate(X, y, verbose=0)
@@ -247,7 +247,8 @@ def model_ovr_pipeline(
     target_class = 0,
     epochs = 5,
     model_func = create_model,
-    input_shape=INPUT_SHAPE
+    input_shape=INPUT_SHAPE,
+    threshold = 0.5
 ) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
     """
         Builds and trains a one-vs-rest classification model pipeline for galaxy images.
@@ -278,7 +279,7 @@ def model_ovr_pipeline(
         epochs=epochs
     )
     plot_results(history, target_class)
-    metrics, y_true, y_pred = evaluate_model(X, y, model, target_class)
+    metrics, y_true, y_pred = evaluate_model(X, y, model, target_class, threshold)
     plot_confusion_matrix(y_true, y_pred, target_class)
 
     return df, model, history, X, y_true, y_pred
