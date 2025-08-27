@@ -14,20 +14,14 @@ import sys, os
 sys.path.append(os.path.abspath("../src"))
 from galaxy_zoo.logic.data import generate_image_df, load_and_preprocess_data
 
-df = generate_image_df(nb_data = 2000) # default values
-df
-
-X, y = load_and_preprocess_data(df, False, target_size=(424,424))
-
-y_cat= to_categorical(y)
 
 # Initialisation d'un modèle
-def initialize_model():
+def initialize_model(X):
 
     model = Sequential()
 
     #Type de donnees d'entree
-    model.add(Input((424, 424, 3)))
+    model.add(Input(X.shape))
 
     model.add(layers.Rescaling(1./255))
 
@@ -58,19 +52,6 @@ def compile_model(model):
                   optimizer = 'adam',
                   metrics = ['Precision'])
     return model
-
-#Code pour fit et run le modèle
-
-model = initialize_model()
-model_small = compile_model(model)
-
-es = EarlyStopping(patience = 5, verbose = 2,restore_best_weights=True)
-
-history_small = model_small.fit(X, y_cat,
-                    validation_split = 0.3,
-                    callbacks = [es],
-                    epochs = 20,
-                    batch_size = 32)
 
 
 # Avec ces paramètres on obtient une val accuracy de 0.68 (pour 1000 par categorie)
@@ -107,5 +88,29 @@ def plot_history2(history, title='', axs=None, exp_name=""):
 
 # Plot de history
 
-plot_history2(history_small)
-plt.show()
+# plot_history2(history_small)
+# plt.show()
+
+
+if __name__=="__main__":
+
+    a= int(input("Entrez le nombre de galaxies voulues - par classe égales = "))
+    b= int(input("Entrez la target size des images -default 424 - x= "))
+    df = generate_image_df(nb_data = a) # default values
+    X, y = load_and_preprocess_data(df, False, target_size=(b,b))
+    y_cat= to_categorical(y)
+
+
+    model = initialize_model(X)
+    model_small = compile_model(model)
+
+    es = EarlyStopping(patience = 5, verbose = 2,restore_best_weights=True)
+
+    history_small = model_small.fit(X, y_cat,
+                    validation_split = 0.3,
+                    callbacks = [es],
+                    epochs = 20,
+                    batch_size = 32)
+
+
+    model_small.save(f"model_small_{b}_{a}.keras")
