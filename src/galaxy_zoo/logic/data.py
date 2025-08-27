@@ -11,6 +11,7 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
+from galaxy_zoo.utils.utils import print_debug
 
 RANDOM_STATE = 42
 IMG_SIZE = 256
@@ -96,7 +97,7 @@ def load_and_preprocess_data(df: pd.DataFrame,
         Args:
             df (pd.DataFrame): DataFrame containing image file paths in the 'path' column and class labels in the 'simple_target' column.
             target_class (int, optional): The class to be considered as positive (1) in the binary classification. Defaults to 0.
-            target_size (Tuple[int, int], optional): Desired size (height, width) to resize images to. Defaults to (224, 224).
+            target_size (Tuple[int, int], optional): Desired size (height, width) to resize images to. Defaults to (256, 256).
         Returns:
             Tuple[np.ndarray, np.ndarray]:
                 - X: Array of preprocessed images of shape (num_images, height, width, channels).
@@ -105,6 +106,7 @@ def load_and_preprocess_data(df: pd.DataFrame,
     images = []
     labels = []
 
+    # print_debug("load_and_preprocess_data", f"input_shape --> {target_size}")
     # df = generate_image_df(nb_data)
     # print(f"Chargement de {len(df)} images...")
 
