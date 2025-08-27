@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 RANDOM_STATE = 42
+IMG_SIZE = 256
 CURRENT_DIR = os.path.dirname(__file__) # Garde le chemin vers data.py peut import où la fonction est appelé
 
 ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../raw_data")) # on revient a src puis galaxy_zoo
@@ -88,7 +89,7 @@ def load_and_preprocess_data(df: pd.DataFrame,
                             # nb_data: int = 2000,
                             ovr: bool = True,
                             target_class: int = 0,
-                            target_size: Tuple[int, int] = (128, 128),
+                            target_size: Tuple[int, int] = (IMG_SIZE, IMG_SIZE),
                         ) -> Tuple[np.ndarray, np.ndarray]:
     """
         Loads and preprocesses images from a DataFrame, resizing them and creating binary labels for a specified target class.
