@@ -1,6 +1,6 @@
 from keras import layers, models
 
-def create_model_template(input_shape, dropout_rate):
+def create_model_template(input_shape, dropout_rate = 0.25):
     """
     Creates a sequential Keras model template for image classification tasks.
     The model consists of:
@@ -43,10 +43,10 @@ def create_model_template(input_shape, dropout_rate):
 
         # layers.Dense(256, activation='relu'),
         # layers.BatchNormalization(),
-        # layers.Dropout(dropout_rate/2),
+        # layers.Dropout(dropout_rate),
 
         layers.Dense(input_shape[1], activation='relu'),
-        layers.Dropout(dropout_rate/2),
+        layers.Dropout(dropout_rate),
 
         # ---------------------- Couche de sortie binaire
         layers.Dense(1, activation='sigmoid')
