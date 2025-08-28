@@ -10,9 +10,10 @@ import tensorflow as tf
 from galaxy_zoo.utils.utils import print_debug
 from keras.utils import to_categorical
 from google.cloud import storage
+from galaxy_zoo.utils.utils import print_debug
+from keras.utils import to_categorical
+from google.cloud import storage
 from galaxy_zoo.logic.params import *
-
-
 
 FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
 

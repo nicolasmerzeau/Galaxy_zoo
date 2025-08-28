@@ -12,16 +12,16 @@ from tensorflow.keras.utils import to_categorical
 
 import sys, os
 sys.path.append(os.path.abspath("../src"))
-from galaxy_zoo.logic.data import generate_image_df, load_and_preprocess_data
+from src.galaxy_zoo.logic.data import generate_image_df, load_and_preprocess_data
 
 
 # Initialisation d'un modèle
-def initialize_model(X):
+def initialize_model(b):
 
     model = Sequential()
 
     #Type de donnees d'entree
-    model.add(Input(X.shape))
+    model.add(Input((b,b,3)))
 
     model.add(layers.Rescaling(1./255))
 
@@ -91,26 +91,23 @@ def plot_history2(history, title='', axs=None, exp_name=""):
 # plot_history2(history_small)
 # plt.show()
 
-
 if __name__=="__main__":
 
     a= int(input("Entrez le nombre de galaxies voulues - par classe égales = "))
     b= int(input("Entrez la target size des images -default 424 - x= "))
     df = generate_image_df(nb_data = a) # default values
     X, y = load_and_preprocess_data(df, False, target_size=(b,b))
-    y_cat= to_categorical(y)
 
-
-    model = initialize_model(X)
+    model = initialize_model(b)
     model_small = compile_model(model)
 
     es = EarlyStopping(patience = 5, verbose = 2,restore_best_weights=True)
 
-    history_small = model_small.fit(X, y_cat,
+    history_small = model_small.fit(X, y,
                     validation_split = 0.3,
                     callbacks = [es],
                     epochs = 20,
                     batch_size = 32)
 
 
-    model_small.save(f"model_small_{b}_{a}.keras")
+    model_small.save(f"models/model_tests/model_small_NM_{b}_{a}.keras")
