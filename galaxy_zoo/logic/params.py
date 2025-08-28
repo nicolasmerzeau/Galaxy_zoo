@@ -14,7 +14,6 @@ GAR_MEMORY = os.environ.get("GAR_MEMORY")
 
 ##################  CONSTANTS  #####################
 LOCAL_DATA_PATH = os.path.join(os.path.expanduser('~'), "code", "nicolasmerzeau", "Galaxy_zoo", "raw_data")
-LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('~'), "code", "nicolasmerzeau", "Galaxy_zoo", "training_outputs")
 RANDOM_STATE = 42
 IMG_SIZE = 256
 LABEL_MAP = {
@@ -30,7 +29,8 @@ LABEL_MAP = {
 CURRENT_DIR = os.path.dirname(__file__) # Garde le chemin vers params.pu peut import où la fonction est appelé
 
 if MODEL_TARGET == "local" :
-    ROOT_DATA = os.path.abspath(os.path.join(CURRENT_DIR, "../../../raw_data")) # on revient a src puis galaxy_zoo
+    ROOT_DATA = os.path.abspath(os.path.join(CURRENT_DIR, "../../raw_data")) # on revient a src puis galaxy_zoo
 else :
     ROOT_DATA = "/raw_data"
-ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../")) # on revient a GALAXY_Z
+ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../")) # on revient a GALAXY_ZOO
+LOCAL_REGISTRY_PATH =  os.path.abspath(os.path.join(ROOT, "training_outputs"))
