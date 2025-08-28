@@ -173,3 +173,4 @@ cache/
 
 #Modeles Keras
 *.keras
+*.h5

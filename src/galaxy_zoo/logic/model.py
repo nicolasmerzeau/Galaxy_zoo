@@ -9,7 +9,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
 from typing import Tuple, Dict, Any
 from galaxy_zoo.logic.data import load_and_preprocess_data, generate_image_df
-from galaxy_zoo.models.Kani.model_02 import create_model
+from galaxy_zoo.models.model_tests import model_small_ovr
 
 INPUT_SHAPE = (256,256, 3)
 target_names = {
@@ -18,39 +18,8 @@ target_names = {
     2: "Edge-on / Cigar",
     -1: "Other"
 }
-# def init_model(input_shape= INPUT_SHAPE, dropout_rate: float = 0.5) -> models.Sequential:
-#     """
-#     Builds a deep convolutional neural network (CNN) model for binary image classification.
 
-#     This model consists of multiple convolutional blocks with batch normalization, max pooling, and dropout layers to prevent overfitting.
-#     It uses global average pooling before fully connected layers, followed by a binary output layer with sigmoid activation.
-#     The model is compiled with Adam optimizer, binary cross-entropy loss, and metrics suitable for imbalanced datasets.
-
-#     Args:
-#         input_shape (tuple): Shape of the input images, default is (256,256, 3).
-#         dropout_rate (float): Dropout rate for regularization in fully connected layers, default is 0.5.
-
-#     Returns:
-#         models.Sequential: Compiled Keras Sequential model ready for training.
-#     """
-
-#     model = create_model(input_shape, dropout_rate)
-
-#     # Compilation avec des métriques adaptées au déséquilibre de classes
-#     model.compile(
-#         optimizer=optimizers.Adam(learning_rate=0.001),
-#         loss='binary_crossentropy',
-#         metrics=[
-#             'accuracy',
-#             tf.keras.metrics.Precision(name='precision'),
-#             tf.keras.metrics.Recall(name='recall'),
-#             tf.keras.metrics.AUC(name='auc')
-#         ]
-#     )
-
-#     return model
-
-def init_model_custom(model_func = create_model, input_shape= INPUT_SHAPE, dropout_rate: float = 0.5) -> models.Sequential:
+def init_model_custom(model_func = model_small_ovr, input_shape= INPUT_SHAPE, ovr = True) -> models.Sequential:
     """
     Builds a deep convolutional neural network (CNN) model for binary image classification.
 
@@ -59,19 +28,20 @@ def init_model_custom(model_func = create_model, input_shape= INPUT_SHAPE, dropo
     The model is compiled with Adam optimizer, binary cross-entropy loss, and metrics suitable for imbalanced datasets.
 
     Args:
-        input_shape (tuple): Shape of the input images, default is (256,256, 3).
-        dropout_rate (float): Dropout rate for regularization in fully connected layers, default is 0.5.
-
+        input_shape (tuple): Shape of the input images, default is (256,256, 3)
     Returns:
         models.Sequential: Compiled Keras Sequential model ready for training.
     """
 
-    model = model_func(input_shape, dropout_rate)
+    model = model_func(input_shape)
+    loss = 'categorical_crossentropy'
+    if ovr:
+        loss = 'binary_crossentropy'
 
     # Compilation avec des métriques adaptées au déséquilibre de classes
     model.compile(
         optimizer=optimizers.Adam(learning_rate=0.001),
-        loss='binary_crossentropy', # ou sparse_categorical_crossentropy si ovr = False
+        loss=loss,
         metrics=[
             'accuracy',
             tf.keras.metrics.Precision(name='precision'),
@@ -83,7 +53,7 @@ def init_model_custom(model_func = create_model, input_shape= INPUT_SHAPE, dropo
     return model
 
 def train_model(df: pd.DataFrame,
-                model_func=create_model,
+                model_func=model_small_ovr,
                 input_shape=INPUT_SHAPE,
                 target_class=0,
                 ovr = True,
@@ -96,7 +66,7 @@ def train_model(df: pd.DataFrame,
         Trains a Keras model on the provided DataFrame using specified parameters.
         Args:
             df (pd.DataFrame): Input DataFrame containing image data and labels.
-            model_func (Callable, optional): Function to create the Keras model. Defaults to create_model.
+            model_func (Callable, optional): Function to create the Keras model. Defaults to model_small_ovr.
             input_shape (Tuple[int, int, int], optional): Shape of the input images. Defaults to INPUT_SHAPE.
             target_class (int, optional): Target class for One-vs-Rest training. Defaults to 0.
             ovr (bool, optional): If True, performs One-vs-Rest training for the target class. If False, trains on all classes. Defaults to True.
@@ -128,7 +98,7 @@ def train_model(df: pd.DataFrame,
     )
 
     # Construire le modèle
-    model = init_model_custom(model_func, input_shape)
+    model = init_model_custom(model_func, input_shape, ovr=ovr)
 
     # # Calculer le poids des classes pour gérer le déséquilibre
     # pos_weight = (len(y_train) - y_train.sum()) / y_train.sum()
@@ -246,9 +216,10 @@ def model_ovr_pipeline(
     nb_data = 1000,
     target_class = 0,
     epochs = 5,
-    model_func = create_model,
+    model_func = model_small_ovr,
     input_shape=INPUT_SHAPE,
-    threshold = 0.5
+    threshold = 0.5,
+    metrics_only = False
 ) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
     """
         Builds and trains a one-vs-rest classification model pipeline for galaxy images.
@@ -258,7 +229,7 @@ def model_ovr_pipeline(
             nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
             target_class (int, optional): The target class for one-vs-rest classification. Defaults to 5.
             epochs (int, optional): Number of training epochs. Defaults to 10.
-            model_func (Callable, optional): Function to create the model architecture. Defaults to create_model.
+            model_func (Callable, optional): Function to create the model architecture. Defaults to model_small_ovr.
             input_shape (tuple, optional): Shape of the input images. Defaults to INPUT_SHAPE.
         Returns:
             Tuple[
@@ -278,8 +249,12 @@ def model_ovr_pipeline(
         target_class=target_class,
         epochs=epochs
     )
-    plot_results(history, target_class)
+
     metrics, y_true, y_pred = evaluate_model(X, y, model, target_class, threshold)
+    if metrics_only:
+        return metrics
+
+    plot_results(history, target_class)
     plot_confusion_matrix(y_true, y_pred, target_class)
 
     return df, model, history, X, y_true, y_pred
@@ -288,15 +263,16 @@ def model_ovr_pipeline(
 def model_full_pipeline(
     nb_data = 1000,
     epochs = 5,
-    model_func = create_model,
-    input_shape=INPUT_SHAPE
+    model_func = model_small_ovr,
+    input_shape=INPUT_SHAPE,
+    metrics_only = False
 ) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
     """
     Runs the full pipeline for training and evaluating a machine learning model on generated image data.
     Args:
         nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
         epochs (int, optional): Number of training epochs. Defaults to 5.
-        model_func (Callable, optional): Function to create the model architecture. Defaults to `create_model`.
+        model_func (Callable, optional): Function to create the model architecture. Defaults to `model_small_ovr`.
         input_shape (tuple, optional): Shape of the input data. Defaults to `INPUT_SHAPE`.
     Returns:
         Tuple[
@@ -316,7 +292,10 @@ def model_full_pipeline(
         ovr=False,
         epochs=epochs
     )
-    plot_results(history, -1)
-    metrics, y, y_pred = evaluate_model(X, y, model, -1)
 
+    metrics, y, y_pred = evaluate_model(X, y, model, -1)
+    if metrics_only:
+        return metrics
+
+    plot_results(history, -1)
     return df, model, history, X, y, y_pred

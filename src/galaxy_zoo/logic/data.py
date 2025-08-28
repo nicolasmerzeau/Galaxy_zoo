@@ -8,6 +8,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from galaxy_zoo.utils.utils import print_debug
+from keras.utils import to_categorical
 
 RANDOM_STATE = 42
 IMG_SIZE = 256
@@ -117,15 +118,19 @@ def load_and_preprocess_data(df: pd.DataFrame,
 
         images.append(img)
         original_label = int(row['simple_target'])
+        num_classes = 3
         if ovr:
             # Créer le label binary One vs Rest
             binary_label = 1 if original_label == target_class else 0
+            num_classes = 2
             labels.append(binary_label)
         else:
             labels.append(original_label)
 
     X = np.array(images)
-    y = np.array(labels)
+    y = to_categorical(labels, num_classes=num_classes)
+    if ovr:
+        y = np.array(labels)
 
     print(f"{len(X)} images chargées avec succès")
     print(f"   Shape des images: {X.shape}")
