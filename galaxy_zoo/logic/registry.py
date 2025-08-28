@@ -8,7 +8,7 @@ from tensorflow import keras
 from google.cloud import storage
 
 
-def save_model(model: keras.Model = None) -> None:
+def save_model(model: keras.Model = None, model_name: str = None) -> None:
     """
     Persist trained model locally on the hard drive at f"{LOCAL_REGISTRY_PATH}/models/{timestamp}.h5"
     - if MODEL_TARGET='gcs', also persist it in your bucket on GCS at "models/{timestamp}.h5" --> unit 02 only
@@ -18,7 +18,10 @@ def save_model(model: keras.Model = None) -> None:
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
     # Save model locally
-    model_path = os.path.join(LOCAL_REGISTRY_PATH, "saved_models", f"{timestamp}.h5")
+    if model_name :
+        model_path = os.path.join(LOCAL_REGISTRY_PATH, "saved_models", f"{timestamp}{model_name}.h5")
+    else :
+        model_path = os.path.join(LOCAL_REGISTRY_PATH, "saved_models", f"{timestamp}.h5")
     model.save(model_path)
 
     print("✅ Model saved locally")
