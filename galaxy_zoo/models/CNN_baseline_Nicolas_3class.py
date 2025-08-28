@@ -7,12 +7,9 @@ from keras.models import Sequential, Model
 from keras import Input, layers, optimizers, callbacks
 from keras import optimizers
 from keras.callbacks import EarlyStopping
-from tensorflow.keras.utils import to_categorical
+from keras.utils import to_categorical
 
-
-import sys, os
-sys.path.append(os.path.abspath("../src"))
-from src.galaxy_zoo.logic.data import generate_image_df, load_and_preprocess_data
+from galaxy_zoo.logic.data import generate_image_df, load_and_preprocess_data
 
 
 # Initialisation d'un modèle

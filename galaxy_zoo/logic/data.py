@@ -1,16 +1,9 @@
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from pathlib import Path
 from typing import Tuple, Dict, Any
 import os
 from PIL import Image
-import matplotlib.pyplot as plt
 import tensorflow as tf
-from galaxy_zoo.utils.utils import print_debug
-from keras.utils import to_categorical
-from google.cloud import storage
-from galaxy_zoo.utils.utils import print_debug
 from keras.utils import to_categorical
 from google.cloud import storage
 from galaxy_zoo.logic.params import *
