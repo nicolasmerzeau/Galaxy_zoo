@@ -1,5 +1,6 @@
 from galaxy_zoo.logic.model import model_full_pipeline, model_ovr_pipeline
 from galaxy_zoo.models.model_tests import model_small_ovr, model_medium_ovr, model_small
+from galaxy_zoo.logic.registry import save_model
 
 target_names = {
     0: "ELLIPTICAL",
@@ -50,7 +51,7 @@ def run_models(params=params, models=models):
                     if mod['OVR']:
                         for target in mod['TARGET_CLASS']:
                             model_name = create_model_name(mod, img_size, nb_data, epochs, target)
-                            res = model_ovr_pipeline(
+                            res, model = model_ovr_pipeline(
                                 nb_data,
                                 target,
                                 epochs,
@@ -59,9 +60,10 @@ def run_models(params=params, models=models):
                                 metrics_only = True
                             )
                             metrics[model_name] = res
+                            save_model(model)
                     else:
                         model_name = create_model_name(mod, img_size, nb_data, epochs)
-                        res = model_full_pipeline(
+                        res, model = model_full_pipeline(
                             nb_data,
                             epochs,
                             mod['MODEL_FUNC'],
@@ -69,12 +71,12 @@ def run_models(params=params, models=models):
                             metrics_only = True
                         )
                         metrics[model_name] = res
+                        save_model(model)
 
     for name, eval in metrics.items():
         print(f"🎯 {name} ———————————————————————————————\n")
         print(eval)
         print('\n—————————————————————————————————————————')
-
 
     return metrics
 

@@ -252,7 +252,7 @@ def model_ovr_pipeline(
 
     metrics, y_true, y_pred = evaluate_model(X, y, model, target_class, threshold)
     if metrics_only:
-        return metrics
+        return metrics, model
 
     plot_results(history, target_class)
     plot_confusion_matrix(y_true, y_pred, target_class)
@@ -295,7 +295,7 @@ def model_full_pipeline(
 
     metrics, y, y_pred = evaluate_model(X, y, model, -1)
     if metrics_only:
-        return metrics
+        return metrics, model
 
     plot_results(history, -1)
     return df, model, history, X, y, y_pred
