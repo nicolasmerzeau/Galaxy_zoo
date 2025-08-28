@@ -107,4 +107,4 @@ if __name__=="__main__":
                     batch_size = 32)
 
 
-    model_small.save(f"models/model_tests/model_small_NM_{b}_{a}.keras")
+    model_small.save(f"galaxy/logs/model_tests/model_small_NM_{b}_{a}.keras")
