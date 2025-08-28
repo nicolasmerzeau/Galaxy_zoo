@@ -1,0 +1,20 @@
+DATA_SIZE=1k
+CHUNK_SIZE=200
+MODEL_TARGET=local
+# GCP Project
+#GCP_PROJECT_WAGON=wagon-public-datasets
+
+# Your personal GCP project for this bootcamp
+GCP_PROJECT=galaxy-zoo-470308
+GCP_REGION=europe-west1
+
+# Cloud Storage
+BUCKET_NAME=bucket-galaxy-zoo
+
+# BigQuery
+#BQ_REGION=EU
+#BQ_DATASET=taxifare
+
+# Compute Engine
+INSTANCE=galaxy-zoo-instance
+MODEL_TARGET =local
