@@ -8,24 +8,14 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from galaxy_zoo.utils.utils import print_debug
+from keras.utils import to_categorical
 from google.cloud import storage
+from galaxy_zoo.logic.params import *
 
-RANDOM_STATE = 42
-IMG_SIZE = 256
-CURRENT_DIR = os.path.dirname(__file__) # Garde le chemin vers data.py peut import où la fonction est appelé
 
-ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../raw_data")) # on revient a src puis galaxy_zoo
-FILE_PATH = os.path.join(ROOT, "gz2_train_catalog.parquet")
-LABEL_MAP = {
-    0:0,
-    1:0,
-    2:2,
-    3:2,
-    4:1,
-    5:1,
-    6:-1,
-    -1: -1
-}
+
+FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
+
 # target_names = {
 #     0: "Elliptical",
 #     1: "Spiral",
@@ -74,7 +64,7 @@ def generate_image_df(nb_data = 2000, target_class = -1) :
     )
 
     # Dossier à parcourir
-    folder_path = os.path.join(ROOT, "images")
+    folder_path = os.path.join(ROOT_DATA, "images")
 
     # Recherche du sous dossier à partir des 6 premiers caractères du filename
     df_balanced['prefix'] = df_balanced['filename'].str.slice(0, 6)
@@ -118,15 +108,19 @@ def load_and_preprocess_data(df: pd.DataFrame,
 
         images.append(img)
         original_label = int(row['simple_target'])
+        num_classes = 3
         if ovr:
             # Créer le label binary One vs Rest
             binary_label = 1 if original_label == target_class else 0
+            num_classes = 2
             labels.append(binary_label)
         else:
             labels.append(original_label)
 
     X = np.array(images)
-    y = np.array(labels)
+    y = to_categorical(labels, num_classes=num_classes)
+    if ovr:
+        y = np.array(labels)
 
     print(f"{len(X)} images chargées avec succès")
     print(f"   Shape des images: {X.shape}")
