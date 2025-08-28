@@ -23,13 +23,13 @@ def save_model(model: keras.Model = None, model_name: str = None) -> None:
     else :
         model_path = os.path.join(LOCAL_REGISTRY_PATH, "saved_models", f"{timestamp}.h5")
     model.save(model_path)
+    model_filename = model_path.split("/")[-1]
 
     print("✅ Model saved locally")
 
     if MODEL_TARGET == "gcs":
 
 
-        model_filename = model_path.split("/")[-1] # e.g. "20230208-161047.h5" for instance
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(f"models/{model_filename}")
@@ -37,9 +37,9 @@ def save_model(model: keras.Model = None, model_name: str = None) -> None:
 
         print("✅ Model saved to GCS")
 
-        return None
+        return model_filename
 
-    return None
+    return model_filename
 
 
 
