@@ -29,5 +29,8 @@ LABEL_MAP = {
 }
 CURRENT_DIR = os.path.dirname(__file__) # Garde le chemin vers params.pu peut import où la fonction est appelé
 
-ROOT_DATA = os.path.abspath(os.path.join(CURRENT_DIR, "../../raw_data")) # on revient a src puis galaxy_zoo
+if MODEL_TARGET == "local" :
+    ROOT_DATA = os.path.abspath(os.path.join(CURRENT_DIR, "../../../raw_data")) # on revient a src puis galaxy_zoo
+else :
+    ROOT_DATA = "/raw_data"
 ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../")) # on revient a GALAXY_Z
