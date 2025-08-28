@@ -1,5 +1,10 @@
 .PHONY: install
 
+reinstall_package:
+	@pip uninstall -y Galaxy_zoo || :
+	@pip install -e .
+
+
 install:
 	@echo ">>> Suppression TensorFlow/Keras/Numpy/Tensorboard/Protobuf"
 	- pip uninstall -y tensorflow tensorflow-macos keras tensorboard protobuf numpy
