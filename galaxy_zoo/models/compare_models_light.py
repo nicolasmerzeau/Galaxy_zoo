@@ -9,6 +9,7 @@ import pickle
 from colorama import Fore, Style
 from tensorflow import keras
 from google.cloud import storage
+from io import StringIO
 
 
 target_names = {
@@ -103,13 +104,15 @@ def run_models(params=params, models=models):
     model_filename = f"{timestamp}.csv"
 
     if MODEL_TARGET == "gcs":
+        csv_buf = StringIO()
+        df_results.to_csv(csv_buf, index=True)  # index=True pour garder le nom du modèle
+        csv_str = csv_buf.getvalue()
+
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(f"models/metrics/{model_filename}")
-        df_results.to_csv(
-            blob,
-            index=True,
-        )
+        blob.upload_from_string(csv_str, content_type="text/csv")
+
         print("✅ Model saved to GCS")
 
     else :
