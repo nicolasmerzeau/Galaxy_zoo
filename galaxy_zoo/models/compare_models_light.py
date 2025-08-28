@@ -18,8 +18,8 @@ target_names = {
     -1: "ALL",
 }
 params = {
-    'IMG_SIZE': [256, 424],
-    'NB_DATA': [3000],
+    'IMG_SIZE': [256],
+    'NB_DATA': [10],
     "TEST_SIZE": 0.3,
     "EPOCHS": [10],
 }
@@ -30,7 +30,7 @@ models = [
         "OVR": False,
     },
     {
-        "MODEL_FUNC": [model_small_ovr, model_medium_ovr],
+        "MODEL_FUNC": [model_small_ovr],
         "OVR": True,
         "TARGET_CLASS": [0,1,2],
     }
