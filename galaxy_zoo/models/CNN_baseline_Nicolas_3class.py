@@ -8,6 +8,7 @@ from keras import Input, layers, optimizers, callbacks
 from keras import optimizers
 from keras.callbacks import EarlyStopping
 from keras.utils import to_categorical
+from galaxy_zoo.logic.registry import save_model
 
 from galaxy_zoo.logic.data import generate_image_df, load_and_preprocess_data
 
@@ -108,3 +109,4 @@ if __name__=="__main__":
 
 
     model_small.save(f"galaxy/logs/model_tests/model_small_NM_{b}_{a}.keras")
+    save_model(model_small)
