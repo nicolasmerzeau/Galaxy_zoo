@@ -9,7 +9,7 @@ target_names = {
 }
 params = {
     'IMG_SIZE': [256, 424],
-    'NB_DATA': [100],
+    'NB_DATA': [50],
     "TEST_SIZE": 0.3,
     "EPOCHS": [3],
 }
@@ -24,13 +24,18 @@ models = [
         "OVR": True,
         "TARGET_CLASS": [0,1,2],
     },
-
+    {
+        "MODEL_FUNC": model_medium_ovr,
+        "OVR": True,
+        "TARGET_CLASS": [0,1,2],
+    },
 ]
+
 def create_model_name(mod, img_size, nb_img, epochs, target = -1):
     if mod['OVR']:
         return f"TARGET_{target_names[target]}_{mod['MODEL_FUNC'].__name__.upper()}_{img_size}_{nb_img}_EPOCHS_{epochs}"
     else:
-        return f"3_CAT_{mod['MODEL_FUNC'].__name__.upper()}_{img_size}_{nb_img}_EPOCHS_{epochs}"
+        return f"3_CAT_{mod['MODEL_FUNC'].__name__.upper()}_{img_size}-{img_size}X{nb_img}_EPOCHS_{epochs}"
 
 
 def run_models(params=params, models=models):
@@ -72,3 +77,8 @@ def run_models(params=params, models=models):
 
 
     return metrics
+
+
+if __name__=="__main__":
+    run_models()
+    # model.save(f"models/model_tests/model_small_NM_{b}_{a}.keras")

@@ -12,3 +12,6 @@ install:
 	pip install --upgrade pip setuptools wheel
 	pip install --no-cache-dir -r requirements.txt
 	@echo ">>> Terminé."
+
+run_all_models:
+	python -c 'from galaxy_zoo.models.compare_models import run_models; run_models()'
