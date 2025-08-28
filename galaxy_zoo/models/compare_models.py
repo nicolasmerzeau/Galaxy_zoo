@@ -9,9 +9,9 @@ target_names = {
 }
 params = {
     'IMG_SIZE': [256, 424],
-    'NB_DATA': [50],
+    'NB_DATA': [1000, 5000],
     "TEST_SIZE": 0.3,
-    "EPOCHS": [3],
+    "EPOCHS": [30],
 }
 
 models = [
@@ -24,11 +24,11 @@ models = [
         "OVR": True,
         "TARGET_CLASS": [0,1,2],
     },
-    {
-        "MODEL_FUNC": model_medium_ovr,
-        "OVR": True,
-        "TARGET_CLASS": [0,1,2],
-    },
+    # {
+    #     "MODEL_FUNC": model_medium_ovr,
+    #     "OVR": True,
+    #     "TARGET_CLASS": [0,1,2],
+    # },
 ]
 
 def create_model_name(mod, img_size, nb_img, epochs, target = -1):
