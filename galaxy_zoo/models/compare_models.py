@@ -33,7 +33,7 @@ models = [
 
 def create_model_name(mod, img_size, nb_img, epochs, target = -1):
     if mod['OVR']:
-        return f"TARGET_{target_names[target]}_{mod['MODEL_FUNC'].__name__.upper()}_{img_size}_{nb_img}_EPOCHS_{epochs}"
+        return f"TARGET_{target_names[target]}_{mod['MODEL_FUNC'].__name__.upper()}_{img_size}-{img_size}X{nb_img}_EPOCHS_{epochs}"
     else:
         return f"3_CAT_{mod['MODEL_FUNC'].__name__.upper()}_{img_size}-{img_size}X{nb_img}_EPOCHS_{epochs}"
 
