@@ -92,24 +92,39 @@ def load_and_preprocess_data(df: pd.DataFrame,
     # print(f"Chargement de {len(df)} images...")
 
     for idx, row in df.iterrows():
-        # Charger l'image
-        image_path = row['path']
+        failed_loads = 0
+        try:
 
-        img = tf.io.read_file(image_path)
-        img = tf.io.decode_image(img, channels=3, expand_animations=False)
-        img = tf.image.resize(img, target_size)
-        img = tf.image.convert_image_dtype(img, tf.float32)
+            # Charger l'image
+            image_path = row['path']
+            if not os.path.exists(image_path):
+                print(f"⚠️  Fichier introuvable: {image_path}")
+                failed_loads += 1
+                continue
 
-        images.append(img)
-        original_label = int(row['simple_target'])
-        num_classes = 3
-        if ovr:
-            # Créer le label binary One vs Rest
-            binary_label = 1 if original_label == target_class else 0
-            num_classes = 2
-            labels.append(binary_label)
-        else:
-            labels.append(original_label)
+            img = tf.io.read_file(image_path)
+            img = tf.io.decode_image(img, channels=3, expand_animations=False)
+            img = tf.image.resize(img, target_size)
+            img = tf.image.convert_image_dtype(img, tf.float32)
+
+            images.append(img)
+            original_label = int(row['simple_target'])
+            num_classes = 3
+            if ovr:
+                # Créer le label binary One vs Rest
+                binary_label = 1 if original_label == target_class else 0
+                num_classes = 2
+                labels.append(binary_label)
+            else:
+                labels.append(original_label)
+
+        except Exception as e:
+                print(f"❌ Erreur lors du chargement de {row['path']}: {str(e)}")
+                failed_loads += 1
+                continue
+
+        if failed_loads > 0:
+            print(f"⚠️  {failed_loads} images n'ont pas pu être chargées")
 
     X = np.array(images)
     y = to_categorical(labels, num_classes=num_classes)
