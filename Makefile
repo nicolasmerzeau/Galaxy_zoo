@@ -15,3 +15,6 @@ install:
 
 run_all_models:
 	python -c 'from galaxy_zoo.models.compare_models import run_models; run_models()'
+
+run_all_models_light:
+	python -c 'from galaxy_zoo.models.compare_models_light import run_models; run_models()'
