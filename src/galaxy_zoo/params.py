@@ -17,3 +17,13 @@ LOCAL_DATA_PATH = os.path.join(os.path.expanduser('~'), "code", "nicolasmerzeau"
 LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('~'), "code", "nicolasmerzeau", "Galaxy_zoo", "training_outputs")
 RANDOM_STATE = 42
 IMG_SIZE = 256
+LABEL_MAP = {
+    0:0,
+    1:0,
+    2:2,
+    3:2,
+    4:1,
+    5:1,
+    6:-1,
+    -1: -1
+}
