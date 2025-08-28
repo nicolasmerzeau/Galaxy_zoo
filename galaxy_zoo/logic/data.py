@@ -92,7 +92,9 @@ def load_and_preprocess_data(df: pd.DataFrame,
     # print(f"Chargement de {len(df)} images...")
 
     for idx, row in df.iterrows():
+        failed_loads = 0
         try:
+
             # Charger l'image
             image_path = row['path']
             if not os.path.exists(image_path):
