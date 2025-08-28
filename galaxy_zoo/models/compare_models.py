@@ -73,8 +73,8 @@ def run_models(params=params, models=models):
                                     input_shape,
                                     metrics_only = True
                                 )
-                                metrics[model_name] = res
-                                save_model(model)
+                                h5_name = save_model(model, model_name)
+                                metrics[h5_name] = res
                     else:
                         model_name = create_model_name(
                             False,
@@ -90,8 +90,8 @@ def run_models(params=params, models=models):
                             input_shape,
                             metrics_only = True
                         )
-                        metrics[model_name] = res
-                        save_model(model)
+                        h5_name = save_model(model, model_name)
+                        metrics[h5_name] = res
 
     for name, eval in metrics.items():
         print(f"🎯 {name} ———————————————————————————————\n")
