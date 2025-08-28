@@ -1,4 +1,4 @@
-from params import *
+from galaxy_zoo.logic.params import *
 import glob
 import os
 import time

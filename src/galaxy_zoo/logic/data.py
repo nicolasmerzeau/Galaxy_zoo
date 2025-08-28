@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-from galaxy_datasets import gz2
->>>>>>> d16d58b (Add data processing and model training scripts for galaxy image classification)
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -11,33 +7,16 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
-<<<<<<< HEAD
 from galaxy_zoo.utils.utils import print_debug
-<<<<<<< HEAD
-=======
-from src.galaxy_zoo.utils.utils import print_debug
->>>>>>> eb7fcc5 (Mises à jour CNN_baseline_Nicolas_3class)
 from keras.utils import to_categorical
-=======
 from google.cloud import storage
->>>>>>> e226f10 (upload)
+from galaxy_zoo.utils.utils import print_debug
+from keras.utils import to_categorical
+from google.cloud import storage
+from galaxy_zoo.logic.params import *
 
-RANDOM_STATE = 42
-IMG_SIZE = 256
-CURRENT_DIR = os.path.dirname(__file__) # Garde le chemin vers data.py peut import où la fonction est appelé
+FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
 
-ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../raw_data")) # on revient a src puis galaxy_zoo
-FILE_PATH = os.path.join(ROOT, "gz2_train_catalog.parquet")
-LABEL_MAP = {
-    0:0,
-    1:0,
-    2:2,
-    3:2,
-    4:1,
-    5:1,
-    6:-1,
-    -1: -1
-}
 # target_names = {
 #     0: "Elliptical",
 #     1: "Spiral",
@@ -86,7 +65,7 @@ def generate_image_df(nb_data = 2000, target_class = -1) :
     )
 
     # Dossier à parcourir
-    folder_path = os.path.join(ROOT, "images")
+    folder_path = os.path.join(ROOT_DATA, "images")
 
     # Recherche du sous dossier à partir des 6 premiers caractères du filename
     df_balanced['prefix'] = df_balanced['filename'].str.slice(0, 6)
