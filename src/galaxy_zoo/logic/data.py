@@ -11,8 +11,12 @@ import os
 from PIL import Image
 import matplotlib.pyplot as plt
 import tensorflow as tf
+<<<<<<< HEAD
 from galaxy_zoo.utils.utils import print_debug
 <<<<<<< HEAD
+=======
+from src.galaxy_zoo.utils.utils import print_debug
+>>>>>>> eb7fcc5 (Mises à jour CNN_baseline_Nicolas_3class)
 from keras.utils import to_categorical
 =======
 from google.cloud import storage
