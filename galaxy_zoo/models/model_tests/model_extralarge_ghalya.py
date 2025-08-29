@@ -1,11 +1,7 @@
 from keras import layers, models, Input
 from keras.models import Sequential, Model
 
-def create_model_template(input_shape):
-
-    model = Sequential()
-    model.add(Input(input_shape))
-
+def model_extralarge_ghalya(input_shape):
 
     model = Sequential()
     model.add(Input(input_shape))

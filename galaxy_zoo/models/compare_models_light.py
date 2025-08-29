@@ -1,6 +1,8 @@
 from galaxy_zoo.logic.data import generate_image_df, load_preproc_and_split
 from galaxy_zoo.logic.model import model_full_pipeline_from_preproc, model_ovr_pipeline_from_preproc
 from galaxy_zoo.models.model_tests import model_large_kani, model_small_nicolas
+from galaxy_zoo.models.model_tests.model_vgg import model_vgg
+from galaxy_zoo.models.model_tests.model_extralarge_ghalya import model_extralarge_ghalya
 from galaxy_zoo.logic.registry import save_model
 import pandas as pd
 import os
@@ -20,8 +22,8 @@ target_names = {
     -1: "ALL",
 }
 params = {
-    'IMG_SIZE': [256, 424],
-    'NB_DATA': [10],
+    'IMG_SIZE': [256],
+    'NB_DATA': [30],
     "TEST_SIZE": 0.3,
     "EPOCHS": [10],
 }
@@ -62,7 +64,7 @@ def run_models(params=params, models=models):
                         epochs,
                         model_func,
                     )
-                    res, model = model_full_pipeline_from_preproc(
+                    res, model, history = model_full_pipeline_from_preproc(
                         df_split_data['all_cats'][0], # tuple Xtrain, Xtest ...
                         df_split_data['all_cats'][1], # X
                         df_split_data['all_cats'][2], # y
@@ -71,7 +73,7 @@ def run_models(params=params, models=models):
                         input_shape,
                         metrics_only = True
                     )
-                    h5_name = save_model(model, model_name)
+                    h5_name = save_model(model, model_name, history)
                     metrics[h5_name] = res
 
                     # OVR
@@ -85,17 +87,17 @@ def run_models(params=params, models=models):
                             target
                         )
 
-                        res, model = model_ovr_pipeline_from_preproc(
-                            df_split_data[f"ovr_{target}"][0], # tuple Xtrain, Xtest ...
-                            df_split_data[f"ovr_{target}"][1], # X
-                            df_split_data[f"ovr_{target}"][2], # y
+                        res, model, history = model_ovr_pipeline_from_preproc(
+                            df_split_data[f"ovr{target}"][0], # tuple Xtrain, Xtest ...
+                            df_split_data[f"ovr{target}"][1], # X
+                            df_split_data[f"ovr{target}"][2], # y
                             target,
                             epochs,
                             model_func,
                             input_shape,
                             metrics_only = True
                         )
-                        h5_name = save_model(model, model_name)
+                        h5_name = save_model(model, model_name, history)
                         metrics[h5_name] = res
 
     for name, eval in metrics.items():

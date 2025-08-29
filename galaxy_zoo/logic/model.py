@@ -68,15 +68,10 @@ def get_class_weight(y_train):
         -------
         dict
             Dictionary mapping each class (0 and 1) to its computed weight.
-
-        Notes
-        -----
-        Uses scikit-learn's `compute_class_weight` with the "balanced" option,
-        which assigns weights inversely proportional to class frequencies.
     """
     classes = np.unique(y_train)  # [0,1]
     weights = compute_class_weight(
-        class_weight="balanced",  # option qui fait l'inverse des fréquences
+        class_weight="balanced",
         classes=classes,
         y=list(y_train)
     )
@@ -200,6 +195,7 @@ def train_model_with_processed_data(
         callbacks=[es],
         verbose=1,
         class_weight=class_weight  # Gérer le déséquilibre
+        ### save toutes les X epochs
     )
 
     return model, history.history
@@ -391,24 +387,36 @@ def model_ovr_pipeline_from_preproc(
     metrics_only = False
 ) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
     """
-        Builds and trains a one-vs-rest classification model pipeline for galaxy images.
-        This function generates a dataset, trains a model, plots training results,
-        evaluates the model, and plots the confusion matrix for the specified target class.
-        Args:
-            nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
-            target_class (int, optional): The target class for one-vs-rest classification. Defaults to 5.
-            epochs (int, optional): Number of training epochs. Defaults to 10.
-            model_func (Callable, optional): Function to create the model architecture. Defaults to model_small_nicolas.
-            input_shape (tuple, optional): Shape of the input images. Defaults to INPUT_SHAPE.
-        Returns:
-            Tuple[
-                pd.DataFrame,         # DataFrame containing generated image data and labels
-                tf.keras.Model,       # Trained Keras model
-                Dict[str, Any],       # Training history
-                np.ndarray,           # Input data used for evaluation
-                np.ndarray,           # True labels for evaluation
-                np.ndarray            # Predicted labels for evaluation
-            ]
+    Trains and evaluates a one-vs-rest (OVR) classification model using preprocessed data.
+    Args:
+        split_data (Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]):
+            A tuple containing (X_train, X_val, y_train, y_val) arrays for training and validation.
+        X (np.ndarray):
+            Input features for evaluation.
+        y (np.ndarray):
+            True labels for evaluation.
+        target_class (int, optional):
+            The target class for OVR classification. Defaults to 0.
+        epochs (int, optional):
+            Number of training epochs. Defaults to 5.
+        model_func (Callable, optional):
+            Function to create the model architecture. Defaults to model_small_nicolas.
+        input_shape (Any, optional):
+            Shape of the input data. Defaults to INPUT_SHAPE.
+        metrics_only (bool, optional):
+            If True, returns only metrics, model, and history. Defaults to False.
+    Returns:
+        Tuple:
+            If metrics_only is True:
+                metrics (pd.DataFrame): Evaluation metrics.
+                model (tf.keras.Model): Trained Keras model.
+                history (Dict[str, Any]): Training history.
+            If metrics_only is False:
+                model (tf.keras.Model): Trained Keras model.
+                history (Dict[str, Any]): Training history.
+                X (np.ndarray): Input features.
+                y_true (np.ndarray): True labels.
+                y_pred (np.ndarray): Predicted labels.
     """
     # df = generate_image_df(nb_data, target_class)
     model, history = train_model_with_processed_data(
@@ -422,7 +430,7 @@ def model_ovr_pipeline_from_preproc(
 
     metrics, y_true, y_pred = evaluate_model(X, y, model, target_class)
     if metrics_only:
-        return metrics, model
+        return metrics, model, history
 
     plot_results(history, target_class)
     plot_confusion_matrix(y_true, y_pred, target_class)
@@ -438,23 +446,30 @@ def model_full_pipeline_from_preproc(
     model_func = model_small_nicolas,
     input_shape=INPUT_SHAPE,
     metrics_only = False
-) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
+
     """
-    Runs the full pipeline for training and evaluating a machine learning model on generated image data.
+    Runs the full model pipeline starting from preprocessed data, including training, evaluation, and optional plotting.
     Args:
-        nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
+        split_data (Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]): Tuple containing (X_train, X_val, y_train, y_val) arrays.
+        X: Input features for evaluation.
+        y: Target labels for evaluation.
         epochs (int, optional): Number of training epochs. Defaults to 5.
-        model_func (Callable, optional): Function to create the model architecture. Defaults to `model_small_nicolas`.
-        input_shape (tuple, optional): Shape of the input data. Defaults to `INPUT_SHAPE`.
+        model_func (callable, optional): Function to create the model architecture. Defaults to model_small_nicolas.
+        input_shape: Shape of the input data. Defaults to INPUT_SHAPE.
+        metrics_only (bool, optional): If True, only returns metrics, model, and history. Defaults to False.
     Returns:
-        Tuple[
-            pd.DataFrame,         # DataFrame containing generated image data and labels
-            tf.keras.Model,       # Trained Keras model
-            Dict[str, Any],       # Training history dictionary
-            np.ndarray,           # Input data array (X)
-            np.ndarray,           # True labels array (y)
-            np.ndarray            # Predicted labels array (y_pred)
-        ]
+        Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
+            If metrics_only is True:
+                metrics (pd.DataFrame): Evaluation metrics.
+                model (tf.keras.Model): Trained Keras model.
+                history (Dict[str, Any]): Training history.
+            If metrics_only is False:
+                model (tf.keras.Model): Trained Keras model.
+                history (Dict[str, Any]): Training history.
+                X (np.ndarray): Input features.
+                y (np.ndarray): True labels.
+                y_pred (np.ndarray): Model predictions.
     """
 
     model, history = train_model_with_processed_data(
@@ -467,7 +482,7 @@ def model_full_pipeline_from_preproc(
 
     metrics, y, y_pred = evaluate_model(X, y, model, -1)
     if metrics_only:
-        return metrics, model
+        return metrics, model, history
 
     plot_results(history, -1)
     return model, history, X, y, y_pred
