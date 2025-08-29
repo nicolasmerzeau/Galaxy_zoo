@@ -91,8 +91,64 @@ def load_preproc_and_split(df, input_shape , ovr = False, target_class = -1 ):
         X, y, test_size=0.3, random_state=RANDOM_STATE, stratify=y
     ), X, y)
 
+def generate_X(df: pd.DataFrame,
+                target_size: Tuple[int, int] = (IMG_SIZE, IMG_SIZE),
+            ) -> np.ndarray:
+    images = []
+    labels = []
+
+    for idx, row in df.iterrows():
+
+        # Charger l'image
+        image_path = row['path']
+        if not os.path.exists(image_path):
+            print(f"⚠️  Fichier introuvable: {image_path}")
+            failed_loads += 1
+            continue
+
+        img = tf.io.read_file(image_path)
+        img = tf.io.decode_image(img, channels=3, expand_animations=False)
+        img = tf.image.resize(img, target_size)
+        img = tf.image.convert_image_dtype(img, tf.float32)
+
+        images.append(img)
+
+    X = np.array(images)
+
+    print(f"{len(X)} images chargées avec succès")
+    print(f"   Shape des images: {X.shape}")
+
+    return X
+
+def generate_y_and_split(
+            df: pd.DataFrame,
+            X: np.ndarray,
+            ovr: bool = True,
+            target_class: int = 0,
+        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
+    labels = []
+    for idx, row in df.iterrows():
+        original_label = int(row['simple_target'])
+        if ovr:
+            # Créer le label binary One vs Rest
+            binary_label = 1 if original_label == target_class else 0
+            labels.append(binary_label)
+        else:
+            labels.append(original_label)
+
+    y = np.array(labels)
+    if not ovr:
+        y = to_categorical(labels, num_classes=3)
+
+    return (train_test_split(X, y, test_size=0.3, random_state=RANDOM_STATE, stratify=y), y)
+
+
+
+
+
+
 def load_and_preprocess_data(df: pd.DataFrame,
-                            # nb_data: int = 2000,
                             ovr: bool = True,
                             target_class: int = 0,
                             target_size: Tuple[int, int] = (IMG_SIZE, IMG_SIZE),
