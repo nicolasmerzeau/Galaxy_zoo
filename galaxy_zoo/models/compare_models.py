@@ -1,9 +1,7 @@
 from galaxy_zoo.logic.data import generate_image_df, load_preproc_and_split
 from galaxy_zoo.logic.model import model_full_pipeline_from_preproc, model_ovr_pipeline_from_preproc
-from galaxy_zoo.models.model_tests import model_large_kani, model_small_nicolas
-from galaxy_zoo.models.model_tests.model_vgg import model_vgg
-from galaxy_zoo.models.model_tests.model_extralarge_ghalya import model_extralarge_ghalya
-from galaxy_zoo.models.model_tests.model_big_nicolas import model_big_nicolas
+from galaxy_zoo.models.model_tests import model_large_kani, model_small_nicolas, model_extralarge_ghalya, model_big_nicolas
+# from galaxy_zoo.models.model_tests.model_vgg import model_vgg
 
 from galaxy_zoo.logic.registry import save_model
 import pandas as pd
@@ -24,13 +22,13 @@ target_names = {
     -1: "ALL",
 }
 params = {
-    'IMG_SIZE': [256],
-    'NB_DATA': [1000],
+    'IMG_SIZE': [256, 424],
+    'NB_DATA': [3000],
     "TEST_SIZE": 0.3,
-    "EPOCHS": [10],
+    "EPOCHS": [100],
 }
 
-models = [model_small_nicolas, model_large_kani, model_extralarge_ghalya, model_vgg, model_big_nicolas ]
+models = [model_small_nicolas, model_large_kani, model_extralarge_ghalya, model_big_nicolas ]
 cats = [0, 1, 2]
 
 def create_model_name(ovr, img_size, nb_img, epochs, model_func, target = -1):
