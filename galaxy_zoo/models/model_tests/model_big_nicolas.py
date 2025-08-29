@@ -9,19 +9,12 @@ def model_big_nicolas(input_shape):
     model.add(Input(input_shape))
 
     model.add(layers.Conv2D(filters=32, kernel_size=(3,3), activation="relu", padding="same"))
-    model.add(layers.MaxPooling2D(pool_size=(2, 2), padding="same") )
-
     model.add(layers.Conv2D(filters=32, kernel_size=(3,3), activation="relu", padding="same"))
-    model.add(layers.MaxPooling2D(pool_size=(2, 2), padding="same") )
 
     model.add(layers.Conv2D(filters=64, kernel_size=(3,3), activation="relu", padding="same"))
-    model.add(layers.MaxPooling2D(pool_size=(2, 2), padding="same") )
-
     model.add(layers.Conv2D(filters=64, kernel_size=(3,3), activation="relu", padding="same"))
-    model.add(layers.MaxPooling2D(pool_size=(2, 2), padding="same") )
 
     model.add(layers.Conv2D(filters=128, kernel_size=(3,3), activation="relu", padding="same"))
-    model.add(layers.MaxPooling2D(pool_size=(2, 2), padding="same") )
 
     model.add(layers.Flatten())
 

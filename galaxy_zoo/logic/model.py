@@ -168,7 +168,7 @@ def train_model_with_processed_data(
                 ovr = True,
                 epochs: int=5,
                 batch_size: int=32,
-                patience: int=5) -> Tuple[tf.keras.Model, Dict[str, Any]]:
+                patience: int=10) -> Tuple[tf.keras.Model, Dict[str, Any]]:
 
 
     if ovr:
