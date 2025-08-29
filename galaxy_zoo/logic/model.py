@@ -10,10 +10,10 @@ from sklearn.utils.class_weight import compute_class_weight
 import seaborn as sns
 from typing import Tuple, Dict, Any
 from galaxy_zoo.logic.data import load_and_preprocess_data, generate_image_df
-from galaxy_zoo.models.model_tests import model_small_ovr
+from galaxy_zoo.models.model_tests import model_small_nicolas
 from galaxy_zoo.models.model_wrapper import model_wrapper
+from galaxy_zoo.logic.params import *
 
-INPUT_SHAPE = (256,256, 3)
 target_names = {
     0: "Elliptical",
     1: "Spiral",
@@ -21,7 +21,7 @@ target_names = {
     -1: "Other"
 }
 
-def init_model_custom(model_func = model_small_ovr, input_shape= INPUT_SHAPE, ovr = True) -> models.Sequential:
+def init_model_custom(model_func = model_small_nicolas, input_shape = INPUT_SHAPE, ovr = True) -> models.Sequential:
     """
     Builds a deep convolutional neural network (CNN) model for binary image classification.
 
@@ -83,7 +83,7 @@ def get_class_weight(y_train):
     return dict(zip(classes, weights))
 
 def train_model(df: pd.DataFrame,
-                model_func=model_small_ovr,
+                model_func=model_small_nicolas,
                 input_shape=INPUT_SHAPE,
                 target_class=0,
                 ovr = True,
@@ -96,7 +96,7 @@ def train_model(df: pd.DataFrame,
         Trains a Keras model on the provided DataFrame using specified parameters.
         Args:
             df (pd.DataFrame): Input DataFrame containing image data and labels.
-            model_func (Callable, optional): Function to create the Keras model. Defaults to model_small_ovr.
+            model_func (Callable, optional): Function to create the Keras model. Defaults to model_small_nicolas.
             input_shape (Tuple[int, int, int], optional): Shape of the input images. Defaults to INPUT_SHAPE.
             target_class (int, optional): Target class for One-vs-Rest training. Defaults to 0.
             ovr (bool, optional): If True, performs One-vs-Rest training for the target class. If False, trains on all classes. Defaults to True.
@@ -123,7 +123,7 @@ def train_model(df: pd.DataFrame,
 
     # Division train/validation stratifiée
     X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=test_size, random_state=42, stratify=y
+        X, y, test_size=test_size, random_state=RANDOM_STATE, stratify=y
     )
 
     # Construire le modèle
@@ -155,6 +155,54 @@ def train_model(df: pd.DataFrame,
     )
 
     return model, history.history, X, y
+
+def train_model_with_processed_data(
+                split_data: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], # (X_train, X_val, y_train, y_val)
+                model_func=model_small_nicolas,
+                input_shape=INPUT_SHAPE,
+                target_class=0,
+                ovr = True,
+                epochs: int=5,
+                batch_size: int=32,
+                patience: int=5) -> Tuple[tf.keras.Model, Dict[str, Any]]:
+
+
+    if ovr:
+        print(f"Entraînement One vs Rest pour la classe {target_class}")
+    else:
+        print(f"Entraînement sur les 3 classes")
+
+
+    # Construire le modèle
+    model = init_model_custom(model_func, input_shape, ovr=ovr)
+
+    X_train, X_val, y_train, y_val = split_data
+
+    # Calculer le poids des classes pour gérer le déséquilibre
+    class_weight = {0:1, 1:1, 2: 1}
+    if ovr:
+        class_weight = get_class_weight(y_train)
+
+    # Callbacks
+    es = EarlyStopping(
+        patience=patience,
+        restore_best_weights=True,
+        verbose=1,
+    )
+
+    # Entraînement
+    history = model.fit(
+        X_train,
+        y_train,
+        batch_size=batch_size,
+        epochs=epochs,
+        validation_data=(X_val, y_val),
+        callbacks=[es],
+        verbose=1,
+        class_weight=class_weight  # Gérer le déséquilibre
+    )
+
+    return model, history.history
 
 
 def evaluate_model(X, y, model, target_class = 0, threshold = 0.5) -> Tuple[Dict[str, float], np.ndarray, np.ndarray]:
@@ -214,16 +262,16 @@ def plot_results(history, target_class = 0):
     axes[0, 0].legend()
 
     # Accuracy
-    axes[1, 0].plot(history['accuracy'], label='Train')
-    axes[1, 0].plot(history['val_accuracy'], label='Validation')
-    axes[1, 0].set_title('Accuracy')
-    axes[1, 0].legend()
+    axes[0, 1].plot(history['accuracy'], label='Train')
+    axes[0, 1].plot(history['val_accuracy'], label='Validation')
+    axes[0, 1].set_title('Accuracy')
+    axes[0, 1].legend()
 
     # Precision
-    axes[1, 1].plot(history['precision'], label='Train')
-    axes[1, 1].plot(history['val_precision'], label='Validation')
-    axes[1, 1].set_title('Precision')
-    axes[1, 1].legend()
+    axes[1, 0].plot(history['precision'], label='Train')
+    axes[1, 0].plot(history['val_precision'], label='Validation')
+    axes[1, 0].set_title('Precision')
+    axes[1, 0].legend()
 
     plt.tight_layout()
     plt.show()
@@ -248,7 +296,7 @@ def model_ovr_pipeline(
     df: pd.DataFrame,
     target_class = 0,
     epochs = 5,
-    model_func = model_small_ovr,
+    model_func = model_small_nicolas,
     input_shape=INPUT_SHAPE,
     threshold = 0.5,
     metrics_only = False
@@ -261,7 +309,7 @@ def model_ovr_pipeline(
             nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
             target_class (int, optional): The target class for one-vs-rest classification. Defaults to 5.
             epochs (int, optional): Number of training epochs. Defaults to 10.
-            model_func (Callable, optional): Function to create the model architecture. Defaults to model_small_ovr.
+            model_func (Callable, optional): Function to create the model architecture. Defaults to model_small_nicolas.
             input_shape (tuple, optional): Shape of the input images. Defaults to INPUT_SHAPE.
         Returns:
             Tuple[
@@ -282,7 +330,7 @@ def model_ovr_pipeline(
         epochs=epochs
     )
 
-    metrics, y_true, y_pred = evaluate_model(X, y, model, target_class, threshold)
+    metrics, y_true, y_pred = evaluate_model(X, y, model, target_class)
     if metrics_only:
         return metrics, model
 
@@ -295,7 +343,7 @@ def model_ovr_pipeline(
 def model_full_pipeline(
     df: pd.DataFrame,
     epochs = 5,
-    model_func = model_small_ovr,
+    model_func = model_small_nicolas,
     input_shape=INPUT_SHAPE,
     metrics_only = False
 ) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
@@ -304,7 +352,7 @@ def model_full_pipeline(
     Args:
         nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
         epochs (int, optional): Number of training epochs. Defaults to 5.
-        model_func (Callable, optional): Function to create the model architecture. Defaults to `model_small_ovr`.
+        model_func (Callable, optional): Function to create the model architecture. Defaults to `model_small_nicolas`.
         input_shape (tuple, optional): Shape of the input data. Defaults to `INPUT_SHAPE`.
     Returns:
         Tuple[
@@ -331,3 +379,95 @@ def model_full_pipeline(
 
     plot_results(history, -1)
     return df, model, history, X, y, y_pred
+
+def model_ovr_pipeline_from_preproc(
+    split_data: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], # (X_train, X_val, y_train, y_val)
+    X,
+    y,
+    target_class = 0,
+    epochs = 5,
+    model_func = model_small_nicolas,
+    input_shape=INPUT_SHAPE,
+    metrics_only = False
+) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
+    """
+        Builds and trains a one-vs-rest classification model pipeline for galaxy images.
+        This function generates a dataset, trains a model, plots training results,
+        evaluates the model, and plots the confusion matrix for the specified target class.
+        Args:
+            nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
+            target_class (int, optional): The target class for one-vs-rest classification. Defaults to 5.
+            epochs (int, optional): Number of training epochs. Defaults to 10.
+            model_func (Callable, optional): Function to create the model architecture. Defaults to model_small_nicolas.
+            input_shape (tuple, optional): Shape of the input images. Defaults to INPUT_SHAPE.
+        Returns:
+            Tuple[
+                pd.DataFrame,         # DataFrame containing generated image data and labels
+                tf.keras.Model,       # Trained Keras model
+                Dict[str, Any],       # Training history
+                np.ndarray,           # Input data used for evaluation
+                np.ndarray,           # True labels for evaluation
+                np.ndarray            # Predicted labels for evaluation
+            ]
+    """
+    # df = generate_image_df(nb_data, target_class)
+    model, history = train_model_with_processed_data(
+        split_data,
+        model_func,
+        input_shape,
+        target_class,
+        ovr=True,
+        epochs=epochs
+    )
+
+    metrics, y_true, y_pred = evaluate_model(X, y, model, target_class)
+    if metrics_only:
+        return metrics, model
+
+    plot_results(history, target_class)
+    plot_confusion_matrix(y_true, y_pred, target_class)
+
+    return model, history, X, y_true, y_pred
+
+
+def model_full_pipeline_from_preproc(
+    split_data: Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], # (X_train, X_val, y_train, y_val)
+    X,
+    y,
+    epochs = 5,
+    model_func = model_small_nicolas,
+    input_shape=INPUT_SHAPE,
+    metrics_only = False
+) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Runs the full pipeline for training and evaluating a machine learning model on generated image data.
+    Args:
+        nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
+        epochs (int, optional): Number of training epochs. Defaults to 5.
+        model_func (Callable, optional): Function to create the model architecture. Defaults to `model_small_nicolas`.
+        input_shape (tuple, optional): Shape of the input data. Defaults to `INPUT_SHAPE`.
+    Returns:
+        Tuple[
+            pd.DataFrame,         # DataFrame containing generated image data and labels
+            tf.keras.Model,       # Trained Keras model
+            Dict[str, Any],       # Training history dictionary
+            np.ndarray,           # Input data array (X)
+            np.ndarray,           # True labels array (y)
+            np.ndarray            # Predicted labels array (y_pred)
+        ]
+    """
+
+    model, history = train_model_with_processed_data(
+        split_data,
+        model_func,
+        input_shape,
+        ovr=False,
+        epochs=epochs
+    )
+
+    metrics, y, y_pred = evaluate_model(X, y, model, -1)
+    if metrics_only:
+        return metrics, model
+
+    plot_results(history, -1)
+    return model, history, X, y, y_pred

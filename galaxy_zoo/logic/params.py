@@ -16,6 +16,7 @@ GAR_MEMORY = os.environ.get("GAR_MEMORY")
 LOCAL_DATA_PATH = os.path.join(os.path.expanduser('~'), "code", "nicolasmerzeau", "Galaxy_zoo", "raw_data")
 RANDOM_STATE = 42
 IMG_SIZE = 256
+INPUT_SHAPE = (256,256, 3)
 LABEL_MAP = {
     0:0,
     1:0,
