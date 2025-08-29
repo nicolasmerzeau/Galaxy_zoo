@@ -69,43 +69,43 @@ if __name__=="__main__":
     x = layers.Dropout(0.3)(x)
     pred = layers.Dense(3, activation="softmax")(x)
 
-    # We use the keras Functional API to create our keras model
+        # We use the keras Functional API to create our keras model
 
-model_VGG16 = Model(inputs=inputs , outputs=pred)
+    model_VGG16 = Model(inputs=inputs , outputs=pred)
 
-    # And we freeze the VGG16 model
+        # And we freeze the VGG16 model
 
-base_model.trainable = False
+    base_model.trainable = False
 
-adam = optimizers.Adam(learning_rate=0.001)
-model_VGG16.compile(loss='categorical_crossentropy',
-                optimizer=adam,
-                metrics=['Precision'])
+    adam = optimizers.Adam(learning_rate=0.001)
+    model_VGG16.compile(loss='categorical_crossentropy',
+                    optimizer=adam,
+                    metrics=['Precision'])
 
-MODEL = "model_VGG16.keras"
+    MODEL = "model_VGG16.keras"
 
-modelCheckpoint = callbacks.ModelCheckpoint(MODEL,
-                                            monitor="val_loss",
-                                            verbose=0,
-                                            save_best_only=True)
+    modelCheckpoint = callbacks.ModelCheckpoint(MODEL,
+                                                monitor="val_loss",
+                                                verbose=0,
+                                                save_best_only=True)
 
-LRreducer = callbacks.ReduceLROnPlateau(monitor="val_loss",
-                                        factor=0.1,
-                                        patience=3,
-                                        verbose=1,
-                                        min_lr=0)
+    LRreducer = callbacks.ReduceLROnPlateau(monitor="val_loss",
+                                            factor=0.1,
+                                            patience=3,
+                                            verbose=1,
+                                            min_lr=0)
 
-EarlyStopper = callbacks.EarlyStopping(monitor='val_loss',
-                                       patience=5,
-                                       verbose=0,
-                                       restore_best_weights=True)
+    EarlyStopper = callbacks.EarlyStopping(monitor='val_loss',
+                                        patience=5,
+                                        verbose=0,
+                                        restore_best_weights=True)
 
-history_3 = model_VGG16.fit(
-        X,y,
-        epochs=15,
-        validation_split=0.3,
-        callbacks = [modelCheckpoint, LRreducer, EarlyStopper])
+    history_3 = model_VGG16.fit(
+            X,y,
+            epochs=15,
+            validation_split=0.3,
+            callbacks = [modelCheckpoint, LRreducer, EarlyStopper])
 
-model_VGG16.save(f"models/model_tests/model_VGG16_NM_{b}_{a}.keras")
+    model_VGG16.save(f"models/model_tests/model_VGG16_NM_{b}_{a}.keras")
 
-# Avec ces paramètres on obtient une val accuracy de 0.86 (pour 1000 images par categorie)
+    # Avec ces paramètres on obtient une val accuracy de 0.86 (pour 1000 images par categorie)
