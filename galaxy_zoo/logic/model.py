@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from keras import models, optimizers
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
@@ -136,6 +136,15 @@ def train_model(df: pd.DataFrame,
         restore_best_weights=True,
         verbose=1,
     )
+    path = os.path.join(LOCAL_REGISTRY_PATH, "saved_epochs")
+
+    modelCheckpoint = ModelCheckpoint(
+        path,
+        monitor="val_precision",
+        verbose=0,
+        save_best_only=True,
+        # save_freq=,
+    )
 
     # Entraînement
     history = model.fit(
@@ -144,7 +153,7 @@ def train_model(df: pd.DataFrame,
         batch_size=batch_size,
         epochs=epochs,
         validation_data=(X_val, y_val),
-        callbacks=[es],
+        callbacks=[es, modelCheckpoint],
         verbose=1,
         class_weight=class_weight  # Gérer le déséquilibre
     )
@@ -185,6 +194,15 @@ def train_model_with_processed_data(
         verbose=1,
     )
 
+    path = os.path.join(LOCAL_REGISTRY_PATH, "saved_epochs")
+
+    modelCheckpoint = ModelCheckpoint(
+        path,
+        monitor="val_precision",
+        verbose=0,
+        save_best_only=True,
+        # save_freq=,
+    )
     # Entraînement
     history = model.fit(
         X_train,
@@ -192,7 +210,7 @@ def train_model_with_processed_data(
         batch_size=batch_size,
         epochs=epochs,
         validation_data=(X_val, y_val),
-        callbacks=[es],
+        callbacks=[es, modelCheckpoint],
         verbose=1,
         class_weight=class_weight  # Gérer le déséquilibre
         ### save toutes les X epochs
