@@ -12,5 +12,11 @@ def create_model_template(input_shape):
     ## -----> Votre modèle ici <------
 
 
+    # ——————————————————————————————————————————————————————————————————————————————
+
+    # ⚠️ model.add(layers.Dense(3, activation="softmax")) ----- PAS NECESSAIRE
+    # ⚠️ ne pas mettre de couche de sortie , elle est ajoutée automatiquement dans model_wrapper
+    # ——————————————————————————————————————————————————————————————————————————————
+
 
     return model

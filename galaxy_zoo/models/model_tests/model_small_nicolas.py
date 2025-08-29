@@ -2,12 +2,12 @@ from keras import layers, models, Input
 from keras.models import Sequential, Model
 
 # ex - modèle nicolas
-def model_small(input_shape):
+def model_small_nicolas(input_shape):
 
     model = Sequential()
 
     model.add(Input(input_shape))
-    model.add(layers.Rescaling(1./255))
+
     model.add(layers.Conv2D(8, (4, 4), activation="relu", padding="same"))
     model.add(layers.MaxPool2D(pool_size=(2, 2)))
     model.add(layers.Conv2D(16, (3, 3), activation="relu", padding="same"))
@@ -16,5 +16,5 @@ def model_small(input_shape):
     model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 
     model.add(layers.Flatten())
-    model.add(layers.Dense(3, activation="softmax"))
+    # model.add(layers.Dense(3, activation="softmax")) ----->  ajouté dans model_wrapper
     return model

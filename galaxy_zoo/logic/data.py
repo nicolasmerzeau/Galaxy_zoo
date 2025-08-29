@@ -17,27 +17,22 @@ FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
 #     -1: "Other"
 # }
 
-def generate_image_df(nb_data = 2000, target_class = -1) :
+def generate_image_df(nb_data = 2000) :
     """
-    Generates a balanced DataFrame containing image file paths and target labels for a classification experiment.
-
-    This function loads experiment data from a parquet file, maps labels to simplified targets, balances the dataset
-    by sampling up to `nb_data` samples per class (or `nb_data * 2` for the target class if specified), and constructs
-    file paths for each image based on its filename prefix.
-
+    Generates a balanced DataFrame of image file paths and their corresponding labels for use in experiments.
+    This function loads experimental data from a parquet file, maps labels to simplified targets,
+    filters out invalid targets, and balances the dataset by sampling an equal number of images per class.
+    It then constructs the full file paths for each image based on their filename prefixes.
     Args:
-        nb_data (int, optional): Number of samples to include per class. If the class matches `target_class`,
-            up to `nb_data * 2` samples are included. Defaults to 2000.
-        target_class (int, optional): The class to oversample (include up to `nb_data * 2` samples).
-            If set to -1, no class is oversampled. Defaults to -1.
-
+        nb_data (int, optional): Number of samples to select per class. Defaults to 2000.
     Returns:
-        pandas.DataFrame: A DataFrame with columns:
-            - 'prefix': The first 6 characters of the filename, used as a subfolder name.
+        pandas.DataFrame: A DataFrame containing the following columns:
+            - 'prefix': The first 6 characters of the filename, used to locate the subfolder.
             - 'filename': The image filename.
             - 'path': The full path to the image file.
-            - 'simple_target': The mapped target label for classification.
+            - 'simple_target': The simplified target label for the image.
     """
+
     # Load data updated returns img path instead of matrices
 
 
@@ -46,12 +41,9 @@ def generate_image_df(nb_data = 2000, target_class = -1) :
 
     df_experiment["simple_target"] = df_experiment["label"].map(LABEL_MAP)
     df_experiment = df_experiment[df_experiment["simple_target"] != -1]
-    df_balanced = ( # on équilibre le dataset (if classe cible -> nb_data * 2)
+    df_balanced = (
         df_experiment.groupby("simple_target")
-        .apply(lambda x: x.sample(
-            n=min(nb_data * 2 if x['simple_target'].iloc[0] == target_class else nb_data, len(x)),
-            random_state=RANDOM_STATE
-        ))
+        .apply(lambda x: x.sample(n=nb_data, random_state=RANDOM_STATE))
         .reset_index(drop=True)
         .sample(frac=1, random_state=RANDOM_STATE)
         .reset_index(drop=True)
