@@ -1,5 +1,6 @@
+from galaxy_zoo.logic.model import generate_image_df
 from galaxy_zoo.logic.model import model_full_pipeline, model_ovr_pipeline
-from galaxy_zoo.models.model_tests import model_small_ovr, model_medium_ovr, model_small
+from galaxy_zoo.models.model_tests import model_large_kani, model_small_nicolas
 from galaxy_zoo.logic.registry import save_model
 import pandas as pd
 import os
@@ -11,6 +12,7 @@ from tensorflow import keras
 from google.cloud import storage
 from io import StringIO
 
+
 target_names = {
     0: "ELLIPTICAL",
     1: "SPIRAL",
@@ -19,22 +21,13 @@ target_names = {
 }
 params = {
     'IMG_SIZE': [256, 424],
-    'NB_DATA': [3000],
+    'NB_DATA': [1000],
     "TEST_SIZE": 0.3,
     "EPOCHS": [10],
 }
 
-models = [
-    {
-        "MODEL_FUNC": model_small,
-        "OVR": False,
-    },
-    {
-        "MODEL_FUNC": [model_small_ovr, model_medium_ovr],
-        "OVR": True,
-        "TARGET_CLASS": [0,1,2],
-    }
-]
+models = [model_small_nicolas, model_large_kani]
+cats = [0, 1, 2]
 
 def create_model_name(ovr, img_size, nb_img, epochs, model_func, target = -1):
     if ovr:
@@ -46,47 +39,49 @@ def create_model_name(ovr, img_size, nb_img, epochs, model_func, target = -1):
 def run_models(params=params, models=models):
 
     metrics = {}
-
     for img_size in params['IMG_SIZE']:
+        input_shape = (img_size, img_size, 3)
+
         for nb_data in params['NB_DATA']:
-            input_shape = (img_size, img_size, 3)
+            df = generate_image_df(nb_data)
+
             for epochs in params['EPOCHS']:
-                for mod in models:
-                    if mod['OVR']:
-                        for model_func in mod['MODEL_FUNC']:
+                for model_func in models:
+                    # on test chaque model sur : 3 classes + 1 vs Rest * 3
+                    # 3 classes
+                    model_name = create_model_name(
+                        False,
+                        img_size,
+                        nb_data,
+                        epochs,
+                        model_func,
+                    )
+                    res, model = model_full_pipeline(
+                        df,
+                        epochs,
+                        model_func,
+                        input_shape,
+                        metrics_only = True
+                    )
+                    h5_name = save_model(model, model_name)
+                    metrics[h5_name] = res
 
-                            for target in mod['TARGET_CLASS']:
-                                model_name = create_model_name(
-                                    True,
-                                    img_size,
-                                    nb_data,
-                                    epochs,
-                                    model_func,
-                                    target
-                                )
-
-                                res, model = model_ovr_pipeline(
-                                    nb_data,
-                                    target,
-                                    epochs,
-                                    model_func,
-                                    input_shape,
-                                    metrics_only = True
-                                )
-                                h5_name = save_model(model, model_name)
-                                metrics[h5_name] = res
-                    else:
+                    # OVR
+                    for target in cats: # 0, 1, ou 2
                         model_name = create_model_name(
-                            False,
+                            True,
                             img_size,
                             nb_data,
                             epochs,
-                            mod['MODEL_FUNC'],
+                            model_func,
+                            target
                         )
-                        res, model = model_full_pipeline(
-                            nb_data,
+
+                        res, model = model_ovr_pipeline(
+                            df,
+                            target,
                             epochs,
-                            mod['MODEL_FUNC'],
+                            model_func,
                             input_shape,
                             metrics_only = True
                         )
@@ -111,10 +106,11 @@ def run_models(params=params, models=models):
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(f"models/metrics/{model_filename}")
         blob.upload_from_string(csv_str, content_type="text/csv")
+
         print("✅ Model saved to GCS")
 
     else :
-        model_path = os.path.join(LOCAL_REGISTRY_PATH, f"{timestamp}.csv")
+        model_path = os.path.join(LOCAL_REGISTRY_PATH, "metrics", f"{timestamp}.csv")
         df_results.to_csv(model_path, index=True)
 
         print("✅ Model saved locally")

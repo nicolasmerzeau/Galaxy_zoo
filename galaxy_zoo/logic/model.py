@@ -6,10 +6,12 @@ from keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.utils.class_weight import compute_class_weight
 import seaborn as sns
 from typing import Tuple, Dict, Any
 from galaxy_zoo.logic.data import load_and_preprocess_data, generate_image_df
 from galaxy_zoo.models.model_tests import model_small_ovr
+from galaxy_zoo.models.model_wrapper import model_wrapper
 
 INPUT_SHAPE = (256,256, 3)
 target_names = {
@@ -33,7 +35,8 @@ def init_model_custom(model_func = model_small_ovr, input_shape= INPUT_SHAPE, ov
         models.Sequential: Compiled Keras Sequential model ready for training.
     """
 
-    model = model_func(input_shape)
+    model = model_wrapper(model_func, input_shape, ovr)
+
     loss = 'categorical_crossentropy'
     if ovr:
         loss = 'binary_crossentropy'
@@ -51,6 +54,33 @@ def init_model_custom(model_func = model_small_ovr, input_shape= INPUT_SHAPE, ov
     )
 
     return model
+
+def get_class_weight(y_train):
+    """
+        Compute class weights for a binary classification problem (One-vs-Rest).
+
+        Parameters
+        ----------
+        y_train : array-like
+            Array of training labels containing only 0 and 1.
+
+        Returns
+        -------
+        dict
+            Dictionary mapping each class (0 and 1) to its computed weight.
+
+        Notes
+        -----
+        Uses scikit-learn's `compute_class_weight` with the "balanced" option,
+        which assigns weights inversely proportional to class frequencies.
+    """
+    classes = np.unique(y_train)  # [0,1]
+    weights = compute_class_weight(
+        class_weight="balanced",  # option qui fait l'inverse des fréquences
+        classes=classes,
+        y=list(y_train)
+    )
+    return dict(zip(classes, weights))
 
 def train_model(df: pd.DataFrame,
                 model_func=model_small_ovr,
@@ -93,15 +123,17 @@ def train_model(df: pd.DataFrame,
 
     # Division train/validation stratifiée
     X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=test_size, random_state=42,
-        # X, y, test_size=test_size, random_state=42, stratify=y
+        X, y, test_size=test_size, random_state=42, stratify=y
     )
 
     # Construire le modèle
     model = init_model_custom(model_func, input_shape, ovr=ovr)
 
-    # # Calculer le poids des classes pour gérer le déséquilibre
-    # pos_weight = (len(y_train) - y_train.sum()) / y_train.sum()
+
+    # Calculer le poids des classes pour gérer le déséquilibre
+    class_weight = {0:1, 1:1, 2: 1}
+    if ovr:
+        class_weight = get_class_weight(y_train)
 
     # Callbacks
     es = EarlyStopping(
@@ -119,7 +151,7 @@ def train_model(df: pd.DataFrame,
         validation_data=(X_val, y_val),
         callbacks=[es],
         verbose=1,
-        # class_weight={0: 1.0, 1: pos_weight}  # Gérer le déséquilibre
+        class_weight=class_weight  # Gérer le déséquilibre
     )
 
     return model, history.history, X, y
@@ -213,7 +245,7 @@ def plot_confusion_matrix(y_true, y_pred, target_class = 0):
 
 
 def model_ovr_pipeline(
-    nb_data = 1000,
+    df: pd.DataFrame,
     target_class = 0,
     epochs = 5,
     model_func = model_small_ovr,
@@ -241,7 +273,7 @@ def model_ovr_pipeline(
                 np.ndarray            # Predicted labels for evaluation
             ]
     """
-    df = generate_image_df(nb_data, target_class)
+    # df = generate_image_df(nb_data, target_class)
     model, history, X, y = train_model(
         df,
         model_func,
@@ -261,7 +293,7 @@ def model_ovr_pipeline(
 
 
 def model_full_pipeline(
-    nb_data = 1000,
+    df: pd.DataFrame,
     epochs = 5,
     model_func = model_small_ovr,
     input_shape=INPUT_SHAPE,
@@ -284,7 +316,7 @@ def model_full_pipeline(
             np.ndarray            # Predicted labels array (y_pred)
         ]
     """
-    df = generate_image_df(nb_data)
+
     model, history, X, y = train_model(
         df,
         model_func,
