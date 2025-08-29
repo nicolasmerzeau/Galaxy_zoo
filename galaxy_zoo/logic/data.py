@@ -7,6 +7,7 @@ import tensorflow as tf
 from keras.utils import to_categorical
 from google.cloud import storage
 from galaxy_zoo.logic.params import *
+from sklearn.model_selection import train_test_split
 
 FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
 
@@ -58,6 +59,37 @@ def generate_image_df(nb_data = 2000) :
 
     return df_balanced[['prefix', 'filename', 'path', 'simple_target' ]]
 
+def load_preproc_and_split(df, input_shape , ovr = False, target_class = -1 ):
+    """
+    Loads, preprocesses, and splits the dataset into training and validation sets.
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The input dataframe containing the data to be processed.
+    input_shape : tuple
+        The desired shape of the input images (height, width, channels).
+    ovr : bool, optional
+        If True, applies one-vs-rest preprocessing for classification. Default is False.
+    target_class : int, optional
+        The target class for one-vs-rest classification. Default is -1 (no specific class).
+    Returns
+    -------
+    tuple
+        A tuple containing:
+            - train_test_split output: (X_train, X_val, y_train, y_val)
+            - X : numpy.ndarray
+                Preprocessed input features.
+            - y : numpy.ndarray
+                Corresponding labels.
+    """
+
+    # Charger et préprocesser les données
+    X, y = load_and_preprocess_data(df, ovr, target_class, target_size=input_shape[:2])
+
+    # Division train/validation stratifiée
+    return (train_test_split(
+        X, y, test_size=0.3, random_state=RANDOM_STATE, stratify=y
+    ), X, y)
 
 def load_and_preprocess_data(df: pd.DataFrame,
                             # nb_data: int = 2000,

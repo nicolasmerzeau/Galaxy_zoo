@@ -1,5 +1,5 @@
-from galaxy_zoo.logic.model import generate_image_df
-from galaxy_zoo.logic.model import model_full_pipeline, model_ovr_pipeline
+from galaxy_zoo.logic.data import generate_image_df, load_preproc_and_split
+from galaxy_zoo.logic.model import model_full_pipeline_from_preproc, model_ovr_pipeline_from_preproc
 from galaxy_zoo.models.model_tests import model_large_kani, model_small_nicolas
 from galaxy_zoo.logic.registry import save_model
 import pandas as pd
@@ -20,13 +20,13 @@ target_names = {
     -1: "ALL",
 }
 params = {
-    'IMG_SIZE': [256],
-    'NB_DATA': [50],
+    'IMG_SIZE': [256, 424],
+    'NB_DATA': [10],
     "TEST_SIZE": 0.3,
     "EPOCHS": [10],
 }
 
-models = [model_small_nicolas, model_large_kani]
+models = [model_small_nicolas]
 cats = [0, 1, 2]
 
 def create_model_name(ovr, img_size, nb_img, epochs, model_func, target = -1):
@@ -44,7 +44,13 @@ def run_models(params=params, models=models):
 
         for nb_data in params['NB_DATA']:
             df = generate_image_df(nb_data)
+            df_split_data = {}
+            df_split_data['ovr_0'] = load_preproc_and_split(df, input_shape, True, 0)
+            df_split_data['ovr_1'] = load_preproc_and_split(df, input_shape, True, 1)
+            df_split_data['ovr_2'] = load_preproc_and_split(df, input_shape, True, 2)
+            df_split_data['all_cats'] = load_preproc_and_split(df, input_shape, False)
 
+            # Charger et préprocesser les données
             for epochs in params['EPOCHS']:
                 for model_func in models:
                     # on test chaque model sur : 3 classes + 1 vs Rest * 3
@@ -56,8 +62,10 @@ def run_models(params=params, models=models):
                         epochs,
                         model_func,
                     )
-                    res, model = model_full_pipeline(
-                        df,
+                    res, model = model_full_pipeline_from_preproc(
+                        df_split_data['all_cats'][0], # tuple Xtrain, Xtest ...
+                        df_split_data['all_cats'][1], # X
+                        df_split_data['all_cats'][2], # y
                         epochs,
                         model_func,
                         input_shape,
@@ -77,8 +85,10 @@ def run_models(params=params, models=models):
                             target
                         )
 
-                        res, model = model_ovr_pipeline(
-                            df,
+                        res, model = model_ovr_pipeline_from_preproc(
+                            df_split_data[f"ovr_{target}"][0], # tuple Xtrain, Xtest ...
+                            df_split_data[f"ovr_{target}"][1], # X
+                            df_split_data[f"ovr_{target}"][2], # y
                             target,
                             epochs,
                             model_func,
