@@ -32,8 +32,8 @@ async def predict(file: UploadFile = File(...)):
     content = await file.read()
 
 
-    image = Image.open(tf.io.BytesIO(content))
-    print("image content \n", image)
+    # image = Image.open(tf.io.BytesIO(content))
+    # print("image content \n", image)
 
     result = {"class": "Spiral", "confidence": 0.93}
 
