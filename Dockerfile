@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY galaxy_zoo /galaxy_zoo
 
-CMD uvicorn galaxy_zoo.api.api:app --host 0.0.0.0 --port $PORT
+CMD uvicorn galaxy_zoo.api.api:app --host 0.0.0.0 --port ${PORT}

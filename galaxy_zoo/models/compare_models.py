@@ -1,4 +1,4 @@
-from galaxy_zoo.logic.data import generate_image_df, load_preproc_and_split, generate_X, generate_y_and_split
+from galaxy_zoo.logic.data import generate_image_df, generate_X, generate_y_and_split
 from galaxy_zoo.logic.model import model_full_pipeline_from_preproc, model_ovr_pipeline_from_preproc
 from galaxy_zoo.models.model_tests import model_large_kani, model_small_nicolas, model_extralarge_ghalya, model_big_nicolas
 # from galaxy_zoo.models.model_tests.model_vgg import model_vgg

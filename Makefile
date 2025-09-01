@@ -18,3 +18,8 @@ run_all_models:
 
 run_all_models_light:
 	python -c 'from galaxy_zoo.models.compare_models_light import run_models; run_models()'
+
+deploy:
+	docker build --platform linux/amd64 -t ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/galaxy-zoo/${GAR_IMAGE}:prod .
+	docker push ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/galaxy-zoo/${GAR_IMAGE}:prod
+	gcloud run deploy --image ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/galaxy-zoo/${GAR_IMAGE}:prod --memory ${GAR_MEMORY} --region ${GCP_REGION} --env-vars-file .env.yaml
