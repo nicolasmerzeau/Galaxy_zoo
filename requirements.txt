@@ -26,3 +26,5 @@ matplotlib
 seaborn
 
 streamlit
+uvicorn
+fastapi
