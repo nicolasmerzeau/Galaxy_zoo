@@ -22,45 +22,46 @@ def initialize_model(b):
     model.add(Input((b,b,3)))
     model.add(layers.Conv2D(16, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.2))
 
     model.add(layers.Conv2D(16, (4, 4), activation='relu', padding='same'))
-
+    model.add(layers.Dropout(0.2))
 
     model.add(layers.Conv2D(32, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
-
+    model.add(layers.Dropout(0.2))
     model.add(layers.Conv2D(32, (4, 4), activation='relu', padding='same'))
+    model.add(layers.Dropout(0.2))
 
+    model.add(layers.Conv2D(32, (7, 7), activation='relu', padding='same'))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.2))
+    model.add(layers.Conv2D(32, (4,4), activation='relu', padding='same'))
+    model.add(layers.Dropout(0.2))
+
+    model.add(layers.Conv2D(64, (7,7), activation='relu', padding='same'))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.2))
+    model.add(layers.Conv2D(64, (4,4), activation='relu', padding='same'))
+    model.add(layers.Dropout(0.2))
 
     model.add(layers.Conv2D(64, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
-
-    model.add(layers.Conv2D(64, (4,4), activation='relu', padding='same'))
-
-
-    model.add(layers.Conv2D(128, (7,7), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
-
-    model.add(layers.Conv2D(128, (4,4), activation='relu', padding='same'))
-
-
-    model.add(layers.Conv2D(63, (7, 7), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
-
+    model.add(layers.Dropout(0.2))
     model.add(layers.Conv2D(64, (4, 4), activation='relu', padding='same'))
-
+    model.add(layers.Dropout(0.2))
 
     model.add(layers.Conv2D(32, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
-
+    model.add(layers.Dropout(0.2))
     model.add(layers.Conv2D(32, (4, 4), activation='relu', padding='same'))
-
+    model.add(layers.Dropout(0.2))
 
     model.add(layers.Conv2D(16, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
-
+    model.add(layers.Dropout(0.2))
     model.add(layers.Conv2D(16, (4, 4), activation='relu', padding='same'))
-
+    model.add(layers.Dropout(0.2))
     model.add(layers.Flatten())
 
 
@@ -134,4 +135,4 @@ if __name__=="__main__":
 
 
     model_small.save(f"galaxy/logs/model_tests/model_small_NM_{b}_{a}.keras")
-    save_model(model_small)
+    save_model(model_small, history=history_small)
