@@ -18,7 +18,7 @@ FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
 #     -1: "Other"
 # }
 
-def generate_image_df(nb_data = 2000) :
+def generate_image_df(nb_data = 2000) -> pd.DataFrame:
     """
     Generates a balanced DataFrame of image file paths and their corresponding labels for use in experiments.
     This function loads experimental data from a parquet file, maps labels to simplified targets,
@@ -59,43 +59,24 @@ def generate_image_df(nb_data = 2000) :
 
     return df_balanced[['prefix', 'filename', 'path', 'simple_target' ]]
 
-def load_preproc_and_split(df, input_shape , ovr = False, target_class = -1 ):
-    """
-    Loads, preprocesses, and splits the dataset into training and validation sets.
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        The input dataframe containing the data to be processed.
-    input_shape : tuple
-        The desired shape of the input images (height, width, channels).
-    ovr : bool, optional
-        If True, applies one-vs-rest preprocessing for classification. Default is False.
-    target_class : int, optional
-        The target class for one-vs-rest classification. Default is -1 (no specific class).
-    Returns
-    -------
-    tuple
-        A tuple containing:
-            - train_test_split output: (X_train, X_val, y_train, y_val)
-            - X : numpy.ndarray
-                Preprocessed input features.
-            - y : numpy.ndarray
-                Corresponding labels.
-    """
-
-    # Charger et préprocesser les données
-    X, y = load_and_preprocess_data(df, ovr, target_class, target_size=input_shape[:2])
-
-    # Division train/validation stratifiée
-    return (train_test_split(
-        X, y, test_size=0.3, random_state=RANDOM_STATE, stratify=y
-    ), X, y)
-
 def generate_X(df: pd.DataFrame,
                 target_size: Tuple[int, int] = (IMG_SIZE, IMG_SIZE),
             ) -> np.ndarray:
+    """
+    Loads and preprocesses images from file paths specified in a DataFrame.
+    Iterates over the rows of the given DataFrame, loads each image from the 'path' column,
+    resizes it to the specified target size, and converts it to float32 format. Images that
+    cannot be found are skipped with a warning. Returns a NumPy array containing all
+    successfully loaded and processed images.
+    Args:
+        df (pd.DataFrame): DataFrame containing image file paths in the 'path' column.
+        target_size (Tuple[int, int], optional): Desired size (height, width) to resize images to.
+            Defaults to (IMG_SIZE, IMG_SIZE).
+    Returns:
+        np.ndarray: Array of processed images with shape (num_images, height, width, channels).
+    """
+
     images = []
-    labels = []
 
     for idx, row in df.iterrows():
 
@@ -126,8 +107,33 @@ def generate_y_and_split(
             ovr: bool = True,
             target_class: int = 0,
         ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Generates target labels (y) for classification and splits the dataset into training and test sets.
+
+    Depending on the `ovr` flag, the function creates either binary labels for one-vs-rest classification
+    or categorical labels for multi-class classification. The labels are generated from the 'simple_target'
+    column in the provided DataFrame. The function then splits the features and labels into training and
+    test sets using stratified sampling.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing the data and the 'simple_target' column.
+        X (np.ndarray): Feature matrix corresponding to the DataFrame.
+        ovr (bool, optional): If True, generates binary labels for one-vs-rest classification.
+                                If False, generates categorical labels for multi-class classification. Default is True.
+        target_class (int, optional): The target class for one-vs-rest classification. Default is 0.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+            - X_train: Training feature matrix.
+            - X_test: Test feature matrix.
+            - y_train: Training labels.
+            - y_test: Test labels.
+            - y: Full label array (binary or categorical, depending on `ovr`).
+    """
+
 
     labels = []
+
     for idx, row in df.iterrows():
         original_label = int(row['simple_target'])
         if ovr:
@@ -142,10 +148,6 @@ def generate_y_and_split(
         y = to_categorical(labels, num_classes=3)
 
     return (train_test_split(X, y, test_size=0.3, random_state=RANDOM_STATE, stratify=y), y)
-
-
-
-
 
 
 def load_and_preprocess_data(df: pd.DataFrame,
