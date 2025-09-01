@@ -61,6 +61,7 @@ def initialize_model(b):
 
     model.add(layers.Conv2D(16, (4, 4), activation='relu', padding='same'))
 
+    model.add(layers.Flatten())
 
 
     #Classification en sortie en 3 classes
