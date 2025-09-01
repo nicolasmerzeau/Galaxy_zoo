@@ -12,6 +12,7 @@ from keras.utils import to_categorical
 from galaxy_zoo.logic.data import generate_image_df, load_and_preprocess_data
 from keras.applications.vgg16 import VGG16, preprocess_input
 from keras.models import Model
+from galaxy_zoo.logic.registry import save_model
 
 # Fonction pour plot history
 
@@ -106,6 +107,7 @@ if __name__=="__main__":
             validation_split=0.3,
             callbacks = [modelCheckpoint, LRreducer, EarlyStopper])
 
-    model_VGG16.save(f"models/model_tests/model_VGG16_NM_{b}_{a}.keras")
+    save_model(model_VGG16, model_name="VGG16", history=history_3)
+
 
     # Avec ces paramètres on obtient une val accuracy de 0.86 (pour 1000 images par categorie)
