@@ -121,6 +121,7 @@ if __name__=="__main__":
     b= int(input("Entrez la target size des images -default 424 - x= "))
     df = generate_image_df(nb_data = a) # default values
     X, y = load_and_preprocess_data(df, False, target_size=(b,b))
+    X = X.astype("float16")
 
     model = initialize_model(b)
     model_small = compile_model(model)
