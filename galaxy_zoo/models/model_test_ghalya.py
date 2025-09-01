@@ -24,43 +24,43 @@ def initialize_model(b):
     model.add(layers.MaxPooling2D((2, 2)))
 
     model.add(layers.Conv2D(16, (4, 4), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
+
 
     model.add(layers.Conv2D(32, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
 
     model.add(layers.Conv2D(32, (4, 4), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
+
 
     model.add(layers.Conv2D(64, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
 
     model.add(layers.Conv2D(64, (4,4), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
+
 
     model.add(layers.Conv2D(128, (7,7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
 
     model.add(layers.Conv2D(128, (4,4), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
+
 
     model.add(layers.Conv2D(63, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
 
     model.add(layers.Conv2D(64, (4, 4), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
+
 
     model.add(layers.Conv2D(32, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
 
     model.add(layers.Conv2D(32, (4, 4), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
+
 
     model.add(layers.Conv2D(16, (7, 7), activation='relu', padding='same'))
     model.add(layers.MaxPooling2D((2, 2)))
 
     model.add(layers.Conv2D(16, (4, 4), activation='relu', padding='same'))
-    model.add(layers.MaxPooling2D((2, 2)))
+
 
 
     #Classification en sortie en 3 classes
