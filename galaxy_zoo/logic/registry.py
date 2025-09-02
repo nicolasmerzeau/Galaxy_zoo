@@ -136,7 +136,7 @@ def load_model(model_name: str = None, stage="Production") -> keras.Model:
             latest_blob = max(blobs, key=lambda x: x.updated)
         local_model_directory = os.path.join(LOCAL_REGISTRY_PATH, "loaded_models")
         latest_model_path_to_save = os.path.join(local_model_directory, latest_blob.name.split("/")[-1])
-        os.makedirs(local_model_directory)
+        os.makedirs(local_model_directory, exist_ok=True)
         latest_blob.download_to_filename(latest_model_path_to_save)
 
         latest_model = keras.models.load_model(latest_model_path_to_save)
