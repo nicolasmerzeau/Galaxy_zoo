@@ -58,9 +58,11 @@ async def predict(file: UploadFile = File(...)):
     # Prédire
     pred = model.predict(img)
     cls_id = int(np.argmax(pred, axis=1)[0])# (1, num_classes)
+    proba  = float(np.max(pred, axis=1)[0])
 
 
     return {
         "predicted_class": TARGET_NAMES.get(cls_id, "Other"),
+        "probability": proba,
 
     }
