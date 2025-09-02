@@ -107,7 +107,7 @@ if __name__=="__main__":
             validation_split=0.3,
             callbacks = [modelCheckpoint, LRreducer, EarlyStopper])
 
-    save_model(model_VGG16, model_name="VGG16", history=history_3)
+    save_model(model_VGG16, model_name="VGG16")
 
 
     # Avec ces paramètres on obtient une val accuracy de 0.86 (pour 1000 images par categorie)
