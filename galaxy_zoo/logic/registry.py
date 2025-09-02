@@ -93,7 +93,7 @@ def load_model(model_name: str = None, stage="Production") -> keras.Model:
     - Si MODEL_TARGET == "local" : charge un modèle précis par son nom (ex: "20250827-154230.h5"),
       sinon le plus récent si model_name=None.
     - Si MODEL_TARGET == "gcs"   : idem mais depuis ton bucket GCS.
-    - Si aucun modèle trouvé : retourne None.
+  cd   - Si aucun modèle trouvé : retourne None.
     """
 
     if MODEL_TARGET == "local":
@@ -136,6 +136,7 @@ def load_model(model_name: str = None, stage="Production") -> keras.Model:
             latest_blob = max(blobs, key=lambda x: x.updated)
         local_model_directory = os.path.join(LOCAL_REGISTRY_PATH, "loaded_models")
         latest_model_path_to_save = os.path.join(local_model_directory, latest_blob.name.split("/")[-1])
+        os.makedirs(local_model_directory)
         latest_blob.download_to_filename(latest_model_path_to_save)
 
         latest_model = keras.models.load_model(latest_model_path_to_save)
