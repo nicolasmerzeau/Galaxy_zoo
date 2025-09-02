@@ -47,7 +47,7 @@ async def predict(file: UploadFile = File(...)):
     # Vérif MIME
     if file.content_type not in {"image/jpeg", "image/png", "image/jpg"}:
         raise HTTPException(status_code=400, detail="Please upload a JPEG or PNG image.")
-    model = load_model()
+    model = load_model("20250902-081855VGG16.h5")
     # Lire et prétraiter
     contents = await file.read()
     try:
@@ -56,10 +56,11 @@ async def predict(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid image file.")
 
     # Prédire
-    pred = model.predict(img)            # (1, num_classes)
+    pred = model.predict(img)
+    cls_id = int(np.argmax(pred, axis=1)[0])# (1, num_classes)
 
 
     return {
-        "predicted_class": TARGET_NAMES.get(pred, "Other"),
+        "predicted_class": TARGET_NAMES.get(cls_id, "Other"),
 
     }
