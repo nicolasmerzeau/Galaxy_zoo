@@ -56,12 +56,10 @@ async def predict(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Invalid image file.")
 
     # Prédire
-    preds = model.predict(img)            # (1, num_classes)
-    cls_id = int(tf.argmax(preds, axis=1).numpy()[0])
-    proba = float(tf.reduce_max(preds, axis=1).numpy()[0])
+    pred = model.predict(img)            # (1, num_classes)
+
 
     return {
-        "predicted_class": TARGET_NAMES.get(cls_id, "Other"),
-        "class_id": cls_id,
-        "probability": proba
+        "predicted_class": TARGET_NAMES.get(pred, "Other"),
+
     }
