@@ -191,7 +191,11 @@ def load_and_preprocess_data(df: pd.DataFrame,
 
             images.append(img)
             original_label = int(row['simple_target'])
-            num_classes = 3
+            num_classes = 7
+
+            # Nicolas a modifié num classes de 3 à 7
+
+
             if ovr:
                 # Créer le label binary One vs Rest
                 binary_label = 1 if original_label == target_class else 0
