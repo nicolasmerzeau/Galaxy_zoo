@@ -47,11 +47,11 @@ async def predict(file: UploadFile = File(...)):
     # Vérif MIME
     if file.content_type not in {"image/jpeg", "image/png", "image/jpg"}:
         raise HTTPException(status_code=400, detail="Please upload a JPEG or PNG image.")
-    model = load_model
+    model = load_model()
     # Lire et prétraiter
     contents = await file.read()
     try:
-        img = preprocess_bytes(contents, size=256)
+        img = preprocess_bytes(contents, size=(256,256))
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid image file.")
 
