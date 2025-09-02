@@ -1,13 +1,29 @@
 from galaxy_zoo.logic.registry import load_model
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import os
-from PIL import Image
 import tensorflow as tf
-
+from galaxy_zoo.logic.params import *
 
 app = FastAPI()
+
+
+TARGET_NAMES = {
+    0: "Elliptical",
+    1: "Spiral",
+    2: "Edge-on / Cigar",
+    -1: "Other"
+}
+
+
+def preprocess_bytes(image_bytes: bytes, size=(256, 256)) -> tf.Tensor:
+    """Decode bytes -> RGB, resize, float32 [0,1], ajoute la dimension batch."""
+    img = tf.io.decode_image(image_bytes, channels=3, expand_animations=False)  # (H,W,3), dtype=uint8
+    img = tf.image.resize(img, size)
+    img = tf.image.convert_image_dtype(img, tf.float32)  # [0,1]
+    img = tf.expand_dims(img, 0)  # (1,H,W,3)
+    return img
+
+
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -25,16 +41,27 @@ def root():
     # $CHA_END
 
 
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    print("In /predict")
-    # Lire le contenu du fichier
-    content = await file.read()
+    # Vérif MIME
+    if file.content_type not in {"image/jpeg", "image/png", "image/jpg"}:
+        raise HTTPException(status_code=400, detail="Please upload a JPEG or PNG image.")
+    model = load_model
+    # Lire et prétraiter
+    contents = await file.read()
+    try:
+        img = preprocess_bytes(contents, size=256)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid image file.")
 
+    # Prédire
+    preds = model.predict(img)            # (1, num_classes)
+    cls_id = int(tf.argmax(preds, axis=1).numpy()[0])
+    proba = float(tf.reduce_max(preds, axis=1).numpy()[0])
 
-    # image = Image.open(tf.io.BytesIO(content))
-    # print("image content \n", image)
-
-    result = {"class": "Spiral", "confidence": 0.93}
-
-    return JSONResponse(result)
+    return {
+        "predicted_class": TARGET_NAMES.get(cls_id, "Other"),
+        "class_id": cls_id,
+        "probability": proba
+    }
