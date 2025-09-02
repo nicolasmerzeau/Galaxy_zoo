@@ -19,6 +19,16 @@ IMG_SIZE = 256
 INPUT_SHAPE = (256,256, 3)
 LABEL_MAP = {
     0:0,
+    1:0,
+    2:2,
+    3:2,
+    4:1,
+    5:1,
+    6:-1,
+    -1: -1
+}
+LABEL_MAP_7 = {
+    0:0,
     1:1,
     2:2,
     3:3,
@@ -27,6 +37,7 @@ LABEL_MAP = {
     6:6,
     -1: -1
 }
+
 #### Nicolas a modifié le dictionnaire pour une classification en 6 catégories #####
 
 CURRENT_DIR = os.path.dirname(__file__) # Garde le chemin vers params.pu peut import où la fonction est appelé
