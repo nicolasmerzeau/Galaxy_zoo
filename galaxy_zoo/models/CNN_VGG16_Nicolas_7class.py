@@ -9,6 +9,7 @@ from keras import optimizers
 from keras.callbacks import EarlyStopping
 from keras.utils import to_categorical
 
+from galaxy_zoo.logic.params import *
 from galaxy_zoo.logic.data import generate_image_df, load_and_preprocess_data
 from keras.applications.vgg16 import VGG16, preprocess_input
 from keras.models import Model
@@ -48,12 +49,12 @@ if __name__=="__main__":
 
     a= int(input("Entrez le nombre de galaxies voulues - par classe égales = "))
     b= int(input("Entrez la target size des images -default 424 - x= "))
-    df = generate_image_df(nb_data = a) # default values
+    df = generate_image_df(nb_data = a, label_map = LABEL_MAP_7) # default values
 
     print(df.info())
     print(df)
 
-    X, y = load_and_preprocess_data(df, False, target_size=(b,b))
+    X, y = load_and_preprocess_data(df, False, target_size=(b,b), num_classes=7)
 
 
 # Initialisation du modèle

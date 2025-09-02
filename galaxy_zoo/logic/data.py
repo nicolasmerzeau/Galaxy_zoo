@@ -18,7 +18,7 @@ FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
 #     -1: "Other"
 # }
 
-def generate_image_df(nb_data = 2000) -> pd.DataFrame:
+def generate_image_df(nb_data = 2000, label_map = LABEL_MAP) -> pd.DataFrame:
     """
     Generates a balanced DataFrame of image file paths and their corresponding labels for use in experiments.
     This function loads experimental data from a parquet file, maps labels to simplified targets,
@@ -40,7 +40,7 @@ def generate_image_df(nb_data = 2000) -> pd.DataFrame:
     # Lecture
     df_experiment = pd.read_parquet(FILE_PATH)
 
-    df_experiment["simple_target"] = df_experiment["label"].map(LABEL_MAP)
+    df_experiment["simple_target"] = df_experiment["label"].map(label_map)
     df_experiment = df_experiment[df_experiment["simple_target"] != -1]
     df_balanced = (
         df_experiment.groupby("simple_target")
@@ -154,6 +154,7 @@ def load_and_preprocess_data(df: pd.DataFrame,
                             ovr: bool = True,
                             target_class: int = 0,
                             target_size: Tuple[int, int] = (IMG_SIZE, IMG_SIZE),
+                            num_classes: int = 3
                         ) -> Tuple[np.ndarray, np.ndarray]:
     """
         Loads and preprocesses images from a DataFrame, resizing them and creating binary labels for a specified target class.
@@ -191,15 +192,9 @@ def load_and_preprocess_data(df: pd.DataFrame,
 
             images.append(img)
             original_label = int(row['simple_target'])
-            num_classes = 7
-
-            # Nicolas a modifié num classes de 3 à 7
-
-
             if ovr:
                 # Créer le label binary One vs Rest
                 binary_label = 1 if original_label == target_class else 0
-                num_classes = 2
                 labels.append(binary_label)
             else:
                 labels.append(original_label)
