@@ -40,7 +40,7 @@ def root():
     return "Hello world"
     # $CHA_END
 
-app.state.modelVGG = load_model("20250902-081855VGG16.h5")
+app.state.modelVGG = load_model("20250903-113623VGG16.h5")
 app.state.model6 = load_model("20250902-125159.h5")
 app.state.modelCNN = load_model("20250903-105248CNN.h5")
 
