@@ -1,6 +1,6 @@
 from galaxy_zoo.logic.data import generate_image_df, generate_X, generate_y_and_split
 from galaxy_zoo.logic.model import model_full_pipeline_from_preproc, model_ovr_pipeline_from_preproc
-# from galaxy_zoo.models.model_tests import model_large_kani, model_small_nicolas, model_extralarge_ghalya, model_big_nicolas
+from galaxy_zoo.models.model_tests import model_extralarge_ghalya
 from galaxy_zoo.models.model_tests.model_vgg import model_vgg
 
 from galaxy_zoo.logic.registry import save_model
@@ -21,17 +21,17 @@ target_names = {
     -1: "ALL",
 }
 params = {
-    'IMG_SIZE': [256],
     # 'IMG_SIZE': [256, 424],
+    'IMG_SIZE': [256],
     'NB_DATA': [3000],
     "TEST_SIZE": 0.3,
     "EPOCHS": [100],
 }
 
-models = [ model_vgg ]
+models = [ model_extralarge_ghalya ]
 cats = []
 # models = [model_small_nicolas, model_large_kani, model_extralarge_ghalya, model_big_nicolas ]
-cats = [0, 1, 2]
+# cats = [0, 1, 2]
 
 def create_model_name(ovr, img_size, nb_img, epochs, model_func, target = -1):
     if ovr:
@@ -51,10 +51,11 @@ def run_models(params=params, models=models):
 
             X = generate_X(df, (img_size, img_size))
 
-            df_split_data['ovr_0'] = generate_y_and_split(df, X, True, 0)
-            df_split_data['ovr_1'] = generate_y_and_split(df, X, True, 1)
-            df_split_data['ovr_2'] = generate_y_and_split(df, X, True, 2)
             df_split_data['all_cats'] = generate_y_and_split(df, X, False)
+            if len(cats)> 0:
+                df_split_data['ovr_0'] = generate_y_and_split(df, X, True, 0)
+                df_split_data['ovr_1'] = generate_y_and_split(df, X, True, 1)
+                df_split_data['ovr_2'] = generate_y_and_split(df, X, True, 2)
 
             # Charger et préprocesser les données
             for epochs in params['EPOCHS']:
