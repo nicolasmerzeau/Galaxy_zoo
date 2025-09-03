@@ -1,15 +1,13 @@
 from galaxy_zoo.logic.data import generate_image_df, generate_X, generate_y_and_split
 from galaxy_zoo.logic.model import model_full_pipeline_from_preproc, model_ovr_pipeline_from_preproc
+from galaxy_zoo.logic.registry import save_model
+from galaxy_zoo.logic.params import *
 from galaxy_zoo.models.model_tests import model_extralarge_ghalya
 from galaxy_zoo.models.model_tests.model_vgg import model_vgg
-
-from galaxy_zoo.logic.registry import save_model
 import pandas as pd
 import os
-from galaxy_zoo.logic.params import *
 import time
 from colorama import Fore, Style
-from tensorflow import keras
 from google.cloud import storage
 from io import StringIO
 

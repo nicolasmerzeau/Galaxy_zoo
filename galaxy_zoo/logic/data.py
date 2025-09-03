@@ -54,6 +54,7 @@ def generate_image_df(nb_data = 2000, label_map = LABEL_MAP, file_path = 'train'
         .sample(frac=1, random_state=RANDOM_STATE)
         .reset_index(drop=True)
     )
+    print(df_experiment.shape, df_balanced.shape)
 
     # Dossier à parcourir
     folder_path = os.path.join(ROOT_DATA, "images")
@@ -159,7 +160,6 @@ def load_and_preprocess_data(df: pd.DataFrame,
                             ovr: bool = True,
                             target_class: int = 0,
                             target_size: Tuple[int, int] = (IMG_SIZE, IMG_SIZE),
-                            num_classes: int = 3
                         ) -> Tuple[np.ndarray, np.ndarray]:
     """
         Loads and preprocesses images from a DataFrame, resizing them and creating binary labels for a specified target class.
@@ -213,7 +213,7 @@ def load_and_preprocess_data(df: pd.DataFrame,
             print(f"⚠️  {failed_loads} images n'ont pas pu être chargées")
 
     X = np.array(images)
-    y = to_categorical(labels, num_classes=num_classes)
+    y = to_categorical(labels)
     if ovr:
         y = np.array(labels)
 
