@@ -48,7 +48,7 @@ def initialize_model(b):
     model.add(layers.MaxPooling2D((2, 2)))
 
 
-
+    model.add(layers.Flatten())
 
 
     #Classification en sortie en 3 classes
