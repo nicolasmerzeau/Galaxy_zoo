@@ -309,18 +309,18 @@ def plot_confusion_matrix_ovr(y_true, y_pred, target_class = 0):
 TARGET_NAMES = ["Elliptical", "Spiral", "Edge-on / Cigar"]
 
 def plot_confusion_matrix(y_true, y_pred):
-    print("Shape des prédictions:", y_pred.shape)
-    print("Shape des vraies étiquettes:", y_true.shape)
-    print("Nombre d'échantillons prédictions:", len(y_pred))
-    print("Nombre d'échantillons vraies étiquettes:", len(y_true))
+    # print("Shape des prédictions:", y_pred.shape)
+    # print("Shape des vraies étiquettes:", y_true.shape)
+    # print("Nombre d'échantillons prédictions:", len(y_pred))
+    # print("Nombre d'échantillons vraies étiquettes:", len(y_true))
     # Matrice de confusion
-    # y_pred = np.argmax(y_pred, axis=1)
     y_pred_labels = np.argmax(y_pred, axis=1)
     y_true_labels = np.argmax(y_true, axis=1)
 
     cm = confusion_matrix(y_true_labels, y_pred_labels)
     plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                    xticklabels=TARGET_NAMES, yticklabels=TARGET_NAMES)
     plt.title(f'Matrice de Confusion')
     plt.show()
 
