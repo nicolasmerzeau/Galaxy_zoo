@@ -9,7 +9,8 @@ from google.cloud import storage
 from galaxy_zoo.logic.params import *
 from sklearn.model_selection import train_test_split
 
-FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
+TRAIN_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
+TEST_PATH = os.path.join(ROOT_DATA, "gz2_test_catalog.parquet")
 
 # target_names = {
 #     0: "Elliptical",
@@ -18,7 +19,7 @@ FILE_PATH = os.path.join(ROOT_DATA, "gz2_train_catalog.parquet")
 #     -1: "Other"
 # }
 
-def generate_image_df(nb_data = 2000, label_map = LABEL_MAP) -> pd.DataFrame:
+def generate_image_df(nb_data = 2000, label_map = LABEL_MAP, file_path = 'train') -> pd.DataFrame:
     """
     Generates a balanced DataFrame of image file paths and their corresponding labels for use in experiments.
     This function loads experimental data from a parquet file, maps labels to simplified targets,
@@ -38,7 +39,11 @@ def generate_image_df(nb_data = 2000, label_map = LABEL_MAP) -> pd.DataFrame:
 
 
     # Lecture
-    df_experiment = pd.read_parquet(FILE_PATH)
+    path = TRAIN_PATH
+    if file_path == "test":
+        path = TEST_PATH
+
+    df_experiment = pd.read_parquet(path)
 
     df_experiment["simple_target"] = df_experiment["label"].map(label_map)
     df_experiment = df_experiment[df_experiment["simple_target"] != -1]

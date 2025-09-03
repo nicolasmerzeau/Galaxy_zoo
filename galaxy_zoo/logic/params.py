@@ -48,3 +48,4 @@ else :
     ROOT_DATA = "/raw_data"
 ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../")) # on revient a GALAXY_ZOO
 LOCAL_REGISTRY_PATH =  os.path.abspath(os.path.join(ROOT, "training_outputs"))
+TARGET_NAMES = ["Elliptical", "Spiral", "Edge-on / Cigar"]

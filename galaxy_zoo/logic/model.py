@@ -13,6 +13,7 @@ from galaxy_zoo.logic.data import load_and_preprocess_data, generate_image_df
 from galaxy_zoo.models.model_tests import model_small_nicolas
 from galaxy_zoo.models.model_wrapper import model_wrapper
 from galaxy_zoo.logic.params import *
+from keras.utils import to_categorical
 
 target_names = {
     0: "Elliptical",
@@ -219,7 +220,7 @@ def train_model_with_processed_data(
     return model, history.history
 
 
-def evaluate_model(X, y, model, target_class = 0, threshold = 0.5) -> Tuple[Dict[str, float], np.ndarray, np.ndarray]:
+def evaluate_model(X, y, model, target_class = 0, threshold = 0.5) -> Tuple[Dict[str, float], np.ndarray, np.ndarray, np.ndarray]:
     """
     Evaluates a trained classification model on the provided dataset and computes key metrics.
     Args:
@@ -256,7 +257,7 @@ def evaluate_model(X, y, model, target_class = 0, threshold = 0.5) -> Tuple[Dict
     for metric, value in metrics.items():
         print(f"   {metric.capitalize()}: {value:.4f}")
 
-    return metrics, y, y_pred
+    return metrics, y, y_pred, y_pred_prob
 
 
 def plot_results(history, target_class = 0):
@@ -290,7 +291,7 @@ def plot_results(history, target_class = 0):
     plt.tight_layout()
     plt.show()
 
-def plot_confusion_matrix(y_true, y_pred, target_class = 0):
+def plot_confusion_matrix_ovr(y_true, y_pred, target_class = 0):
     # Matrice de confusion
     cm = confusion_matrix(y_true, y_pred)
     plt.figure(figsize=(8, 6))
@@ -305,6 +306,27 @@ def plot_confusion_matrix(y_true, y_pred, target_class = 0):
     print(classification_report(y_true, y_pred,
                             target_names=[f'Autres', f'Classe {target_class}']))
 
+TARGET_NAMES = ["Elliptical", "Spiral", "Edge-on / Cigar"]
+
+def plot_confusion_matrix(y_true, y_pred):
+    # print("Shape des prédictions:", y_pred.shape)
+    # print("Shape des vraies étiquettes:", y_true.shape)
+    # print("Nombre d'échantillons prédictions:", len(y_pred))
+    # print("Nombre d'échantillons vraies étiquettes:", len(y_true))
+    # Matrice de confusion
+    y_pred_labels = np.argmax(y_pred, axis=1)
+    y_true_labels = np.argmax(y_true, axis=1)
+
+    cm = confusion_matrix(y_true_labels, y_pred_labels)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                    xticklabels=TARGET_NAMES, yticklabels=TARGET_NAMES)
+    plt.title(f'Matrice de Confusion')
+    plt.show()
+
+    # Rapport détaillé
+    print("\n Rapport de classification:")
+    print(classification_report(y_true_labels, y_pred_labels))
 
 def model_ovr_pipeline(
     df: pd.DataFrame,
@@ -349,7 +371,7 @@ def model_ovr_pipeline(
         return metrics, model
 
     plot_results(history, target_class)
-    plot_confusion_matrix(y_true, y_pred, target_class)
+    plot_confusion_matrix_ovr(y_true, y_pred, target_class)
 
     return df, model, history, X, y_true, y_pred
 
@@ -387,11 +409,13 @@ def model_full_pipeline(
         epochs=epochs
     )
 
-    metrics, y, y_pred = evaluate_model(X, y, model, -1)
+    metrics, y, y_pred, y_pred_proba = evaluate_model(X, y, model, -1)
     if metrics_only:
         return metrics, model
 
     plot_results(history, -1)
+    plot_confusion_matrix(y, y_pred_proba)
+
     return df, model, history, X, y, y_pred
 
 def model_ovr_pipeline_from_preproc(
