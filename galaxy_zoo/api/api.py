@@ -13,6 +13,15 @@ TARGET_NAMES = {
     2: "Edge-on / Cigar",
     -1: "Other"
 }
+TARGET_NAMES_6 = {
+    0: "Elliptical",
+    1: "Round Elliptical",
+    2: "Cigar",
+    3: "Edge-on Disk",
+    4: "Spiral",
+    5: "Barred Spiral",
+    6: "No Bar Or Spiral",
+}
 
 
 def preprocess_bytes(image_bytes: bytes, size=(256, 256)) -> tf.Tensor:
@@ -79,7 +88,7 @@ async def predict6(file: UploadFile = File(...)):
     # Lire et prétraiter
     contents = await file.read()
     try:
-        img = preprocess_bytes(contents, size=(256,256))
+        img = preprocess_bytes(contents, size=(224,224))
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid image file.")
 
@@ -90,7 +99,7 @@ async def predict6(file: UploadFile = File(...)):
 
 
     return {
-        "predicted_class": TARGET_NAMES.get(cls_id, "Other"),
+        "predicted_class": TARGET_NAMES_6.get(cls_id, "Other"),
         "probability": proba,
 
     }
