@@ -10,7 +10,7 @@ from sklearn.utils.class_weight import compute_class_weight
 import seaborn as sns
 from typing import Tuple, Dict, Any
 from galaxy_zoo.logic.data import load_and_preprocess_data, generate_image_df
-from galaxy_zoo.models.model_tests import model_small_nicolas
+from galaxy_zoo.models.model_tests import model_small_nicolas, model_vgg
 from galaxy_zoo.models.model_wrapper import model_wrapper
 from galaxy_zoo.logic.params import *
 from keras.utils import to_categorical
@@ -22,7 +22,7 @@ target_names = {
     -1: "Other"
 }
 
-def init_model_custom(model_func = model_small_nicolas, input_shape = INPUT_SHAPE, ovr = True) -> models.Sequential:
+def init_model_custom(model_func = model_small_nicolas, input_shape = INPUT_SHAPE, ovr = True ) -> models.Sequential:
     """
     Builds a deep convolutional neural network (CNN) model for binary image classification.
 
@@ -86,7 +86,8 @@ def train_model(df: pd.DataFrame,
                 test_size: float=0.2,
                 epochs: int=5,
                 batch_size: int=32,
-                patience: int=5) -> Tuple[tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray]:
+                patience: int=5,
+                ) -> Tuple[tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray]:
 
     """
         Trains a Keras model on the provided DataFrame using specified parameters.
@@ -111,11 +112,11 @@ def train_model(df: pd.DataFrame,
     if ovr:
         print(f"Entraînement One vs Rest pour la classe {target_class}")
     else:
-        print(f"Entraînement sur les 3 classes")
+        print(f"Entraînement sur les {input_shape[2]} classes")
 
 
     # Charger et préprocesser les données
-    X, y = load_and_preprocess_data(df, ovr, target_class, target_size=input_shape[:2])
+    X, y = load_and_preprocess_data(df, ovr, target_class, target_size=input_shape[:2], num_classes=input_shape[2])
 
     # Division train/validation stratifiée
     X_train, X_val, y_train, y_val = train_test_split(
@@ -127,7 +128,7 @@ def train_model(df: pd.DataFrame,
 
 
     # Calculer le poids des classes pour gérer le déséquilibre
-    class_weight = {0:1, 1:1, 2: 1}
+    class_weight = {i: 1 for i in range(input_shape[2])}
     if ovr:
         class_weight = get_class_weight(y_train)
 
@@ -220,19 +221,29 @@ def train_model_with_processed_data(
     return model, history.history
 
 
-def evaluate_model(X, y, model, target_class = 0, threshold = 0.5) -> Tuple[Dict[str, float], np.ndarray, np.ndarray, np.ndarray]:
+def evaluate_model(
+    X,
+    y,
+    model,
+    target_class=0,
+    threshold=0.5
+) -> Tuple[Dict[str, float], np.ndarray, np.ndarray, np.ndarray]:
     """
-    Evaluates a trained classification model on the provided dataset and computes key metrics.
+    Evaluates a classification model on the given dataset and returns evaluation metrics and predictions.
     Args:
-        df (pd.DataFrame): DataFrame containing the input data for evaluation.
-        model: Trained Keras model to be evaluated.
-        target_class (int, optional): The target class to evaluate against the rest. Defaults to 0.
+        X (np.ndarray): Input features for evaluation.
+        y (np.ndarray): True labels corresponding to X.
+        model: Trained classification model with `predict` and `evaluate` methods.
+        target_class (int, optional): Class of interest for evaluation. If -1, evaluates all classes. Defaults to 0.
+        threshold (float, optional): Threshold for converting predicted probabilities to binary predictions. Defaults to 0.5.
     Returns:
-        Tuple[Dict[str, float], np.ndarray, np.ndarray]:
-            - metrics (dict): Dictionary containing loss, accuracy, precision, recall, AUC, and F1-score.
+        Tuple[Dict[str, float], np.ndarray, np.ndarray, np.ndarray]:
+            - metrics (Dict[str, float]): Dictionary containing loss, accuracy, precision, recall, and AUC.
             - y (np.ndarray): True labels.
             - y_pred (np.ndarray): Predicted labels (binary).
+            - y_pred_prob (np.ndarray): Predicted probabilities.
     """
+
 
     # Prédictions
     y_pred_prob = model.predict(X, verbose=0)
@@ -306,21 +317,15 @@ def plot_confusion_matrix_ovr(y_true, y_pred, target_class = 0):
     print(classification_report(y_true, y_pred,
                             target_names=[f'Autres', f'Classe {target_class}']))
 
-TARGET_NAMES = ["Elliptical", "Spiral", "Edge-on / Cigar"]
-
-def plot_confusion_matrix(y_true, y_pred):
-    # print("Shape des prédictions:", y_pred.shape)
-    # print("Shape des vraies étiquettes:", y_true.shape)
-    # print("Nombre d'échantillons prédictions:", len(y_pred))
-    # print("Nombre d'échantillons vraies étiquettes:", len(y_true))
+def plot_confusion_matrix(y_true, y_pred, targets = TARGET_NAMES):
     # Matrice de confusion
     y_pred_labels = np.argmax(y_pred, axis=1)
     y_true_labels = np.argmax(y_true, axis=1)
 
     cm = confusion_matrix(y_true_labels, y_pred_labels)
     plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                    xticklabels=TARGET_NAMES, yticklabels=TARGET_NAMES)
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=targets, yticklabels=targets)
+
     plt.title(f'Matrice de Confusion')
     plt.show()
 
@@ -338,26 +343,31 @@ def model_ovr_pipeline(
     metrics_only = False
 ) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
     """
-        Builds and trains a one-vs-rest classification model pipeline for galaxy images.
-        This function generates a dataset, trains a model, plots training results,
-        evaluates the model, and plots the confusion matrix for the specified target class.
-        Args:
-            nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
-            target_class (int, optional): The target class for one-vs-rest classification. Defaults to 5.
-            epochs (int, optional): Number of training epochs. Defaults to 10.
-            model_func (Callable, optional): Function to create the model architecture. Defaults to model_small_nicolas.
-            input_shape (tuple, optional): Shape of the input images. Defaults to INPUT_SHAPE.
-        Returns:
+    Builds, trains, and evaluates a one-vs-rest (OvR) classification model pipeline.
+    Args:
+        df (pd.DataFrame): DataFrame containing image data and labels.
+        target_class (int, optional): The target class for OvR classification. Defaults to 0.
+        epochs (int, optional): Number of training epochs. Defaults to 5.
+        model_func (Callable, optional): Function to create the model architecture. Defaults to model_small_nicolas.
+        input_shape (tuple, optional): Shape of input images. Defaults to INPUT_SHAPE.
+        threshold (float, optional): Classification threshold for predictions. Defaults to 0.5.
+        metrics_only (bool, optional): If True, returns only metrics and model. Defaults to False.
+    Returns:
+        Tuple[
+            pd.DataFrame,         # The input DataFrame.
+            tf.keras.Model,       # The trained Keras model.
+            Dict[str, Any],       # Training history.
+            np.ndarray,           # Input data (X).
+            np.ndarray,           # True labels (y_true).
+            np.ndarray            # Predicted labels (y_pred).
+        ]
+        If metrics_only is True, returns:
             Tuple[
-                pd.DataFrame,         # DataFrame containing generated image data and labels
-                tf.keras.Model,       # Trained Keras model
-                Dict[str, Any],       # Training history
-                np.ndarray,           # Input data used for evaluation
-                np.ndarray,           # True labels for evaluation
-                np.ndarray            # Predicted labels for evaluation
+                Dict[str, Any],   # Evaluation metrics.
+                tf.keras.Model    # The trained Keras model.
             ]
     """
-    # df = generate_image_df(nb_data, target_class)
+
     model, history, X, y = train_model(
         df,
         model_func,
@@ -384,21 +394,24 @@ def model_full_pipeline(
     metrics_only = False
 ) -> Tuple[pd.DataFrame, tf.keras.Model, Dict[str, Any], np.ndarray, np.ndarray, np.ndarray]:
     """
-    Runs the full pipeline for training and evaluating a machine learning model on generated image data.
+    Runs the full pipeline for training and evaluating a model on the provided DataFrame.
     Args:
-        nb_data (int, optional): Number of data samples to generate. Defaults to 1000.
+        df (pd.DataFrame): Input data for training and evaluation.
         epochs (int, optional): Number of training epochs. Defaults to 5.
-        model_func (Callable, optional): Function to create the model architecture. Defaults to `model_small_nicolas`.
-        input_shape (tuple, optional): Shape of the input data. Defaults to `INPUT_SHAPE`.
+        model_func (callable, optional): Function to create the model architecture. Defaults to model_small_nicolas.
+        input_shape (tuple, optional): Shape of the input data. Defaults to INPUT_SHAPE.
+        metrics_only (bool, optional): If True, returns only metrics and model. Defaults to False.
     Returns:
-        Tuple[
-            pd.DataFrame,         # DataFrame containing generated image data and labels
-            tf.keras.Model,       # Trained Keras model
-            Dict[str, Any],       # Training history dictionary
-            np.ndarray,           # Input data array (X)
-            np.ndarray,           # True labels array (y)
-            np.ndarray            # Predicted labels array (y_pred)
-        ]
+        Tuple containing:
+            - pd.DataFrame: The input DataFrame.
+            - tf.keras.Model: The trained model.
+            - Dict[str, Any]: Training history.
+            - np.ndarray: Input features used for training.
+            - np.ndarray: True labels.
+            - np.ndarray: Predicted labels.
+        If metrics_only is True, returns:
+            - Dict[str, Any]: Evaluation metrics.
+            - tf.keras.Model: The trained model.
     """
 
     model, history, X, y = train_model(

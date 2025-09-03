@@ -27,6 +27,7 @@ LABEL_MAP = {
     6:-1,
     -1: -1
 }
+INPUT_SHAPE_7 = (256,256, 7)
 LABEL_MAP_7 = {
     0:0,
     1:1,
@@ -37,8 +38,16 @@ LABEL_MAP_7 = {
     6:6,
     -1: -1
 }
-
-#### Nicolas a modifié le dictionnaire pour une classification en 6 catégories #####
+TARGET_NAMES = ["Elliptical", "Spiral", "Edge-on / Cigar"]
+TARGET_NAMES_7 = [
+    "Elliptical",
+    "Round Elliptical",
+    "Cigar",
+    "Edge-on Disk",
+    "Spiral",
+    "Barred Spiral",
+    "No Bar Or Spiral",
+]
 
 CURRENT_DIR = os.path.dirname(__file__) # Garde le chemin vers params.pu peut import où la fonction est appelé
 
@@ -48,4 +57,3 @@ else :
     ROOT_DATA = "/raw_data"
 ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../")) # on revient a GALAXY_ZOO
 LOCAL_REGISTRY_PATH =  os.path.abspath(os.path.join(ROOT, "training_outputs"))
-TARGET_NAMES = ["Elliptical", "Spiral", "Edge-on / Cigar"]
