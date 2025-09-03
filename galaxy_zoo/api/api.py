@@ -95,8 +95,8 @@ async def predict6(file: UploadFile = File(...)):
 
     }
 
-@app.post("/predict6")
-async def predict6(file: UploadFile = File(...)):
+@app.post("/predictCNN")
+async def predictCNN(file: UploadFile = File(...)):
     # Vérif MIME
     if file.content_type not in {"image/jpeg", "image/png", "image/jpg"}:
         raise HTTPException(status_code=400, detail="Please upload a JPEG or PNG image.")
