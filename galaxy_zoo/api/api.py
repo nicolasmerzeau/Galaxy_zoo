@@ -52,6 +52,7 @@ def root():
 app.state.modelVGG = load_model("20250903-113623VGG16.h5")
 app.state.model6 = load_model("20250902-125159.h5")
 app.state.modelCNN = load_model("20250903-105248CNN.h5")
+app.state.modelCNN7 = load_model("20250903-234811_7_CAT_MODEL_SMALL_NICOLAS_256-256X5250.h5")
 
 @app.post("/predictVGG")
 async def predictVGG(file: UploadFile = File(...)):
@@ -125,6 +126,31 @@ async def predictCNN(file: UploadFile = File(...)):
 
     return {
         "predicted_class": TARGET_NAMES.get(cls_id, "Other"),
+        "probability": proba,
+
+    }
+
+@app.post("/predictCNN7")
+async def predictCNN7(file: UploadFile = File(...)):
+    # Vérif MIME
+    if file.content_type not in {"image/jpeg", "image/png", "image/jpg"}:
+        raise HTTPException(status_code=400, detail="Please upload a JPEG or PNG image.")
+    model = app.state.modelCNN7
+    # Lire et prétraiter
+    contents = await file.read()
+    try:
+        img = preprocess_bytes(contents, size=(256,256))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid image file.")
+
+    # Prédire
+    pred = model.predict(img)
+    cls_id = int(np.argmax(pred, axis=1)[0])# (1, num_classes)
+    proba  = float(np.max(pred, axis=1)[0])
+
+
+    return {
+        "predicted_class": TARGET_NAMES_7.get(cls_id, "Other"),
         "probability": proba,
 
     }
