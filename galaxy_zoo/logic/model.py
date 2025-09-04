@@ -329,7 +329,7 @@ def plot_confusion_matrix_ovr(y_true, y_pred, target_class = 0):
     print(classification_report(y_true, y_pred,
                             target_names=[f'Autres', f'Classe {target_class}']))
 
-def plot_confusion_matrix(y_true, y_pred, targets = TARGET_NAMES):
+def plot_confusion_matrix(y_true, y_pred, targets = TARGET_NAMES_LIST):
     # Matrice de confusion
     y_pred_labels = np.argmax(y_pred, axis=1)
     y_true_labels = np.argmax(y_true, axis=1)
@@ -478,7 +478,7 @@ def model_full_pipeline(
 
     plot_results(history, -1)
     if num_classes == 7:
-        plot_confusion_matrix(y, y_pred_proba, TARGET_NAMES_7)
+        plot_confusion_matrix(y, y_pred_proba, TARGET_NAMES_7_LIST)
     else :
         plot_confusion_matrix(y, y_pred_proba)
 
