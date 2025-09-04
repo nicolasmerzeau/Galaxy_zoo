@@ -63,7 +63,7 @@ async def predictVGG(file: UploadFile = File(...)):
     # Lire et prétraiter
     contents = await file.read()
     try:
-        img = preprocess_bytes(contents, size=(256,256))
+        img = preprocess_bytes(contents, size=(224,224))
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid image file.")
 
