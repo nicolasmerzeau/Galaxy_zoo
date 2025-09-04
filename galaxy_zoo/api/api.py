@@ -150,7 +150,7 @@ async def predictCNN7(file: UploadFile = File(...)):
 
 
     return {
-        "predicted_class": TARGET_NAMES_7.get(cls_id, "Other"),
+        "predicted_class": TARGET_NAMES_6.get(cls_id, "Other"),
         "probability": proba,
 
     }

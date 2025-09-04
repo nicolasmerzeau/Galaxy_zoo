@@ -38,8 +38,8 @@ LABEL_MAP_7 = {
     6:6,
     -1: -1
 }
-TARGET_NAMES = ["Elliptical", "Spiral", "Edge-on / Cigar"]
-TARGET_NAMES_7 = [
+TARGET_NAMES_LIST = ["Elliptical", "Spiral", "Edge-on / Cigar"]
+TARGET_NAMES_7_LIST = [
     "Elliptical",
     "Round Elliptical",
     "Cigar",
